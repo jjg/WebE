@@ -62,7 +62,7 @@ OK, at this point I have both JSFS and the tunnel starting automatically at boot
 
 ...well there is also the matter of booting things back up when the sun comes back.  Hmm...
 
-For now I've exposed an experimental website at [solar.jasongullickson.com](http://solar.jasongullickson.com/index.html) (which reminds me, it would be nice if jsfs handled default documents...).
+For now I've exposed an experimental website at [solar.jasongullickson.com](http://solar.jasongullickson.com:2022/index.html) (which reminds me, it would be nice if jsfs handled default documents...).
 
 
 ### References
