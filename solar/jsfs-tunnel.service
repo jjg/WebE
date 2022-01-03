@@ -1,0 +1,10 @@
+[Unit]
+Description=AutoSSH tunnel for JSFS
+After=network.target
+
+[Service]
+Environment="AUTOSSH_GATETIME=0"
+ExecStart=/usr/bin/autossh -M 20000 -N -i /home/jason/.ssh/id_rsa_tunnel jason@theneuromantics.net -R 2022:localhost:7302 -C
+
+[Install]
+WantedBy=multi-user.target
