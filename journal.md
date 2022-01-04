@@ -104,3 +104,8 @@ BAT ------------> base
 
 Hmm... looking at the various DIY comparator options I'm leaning toward just ordering some MCP3008's and going that way, but if something else comes up in the meantime I'll experiment.
 
+Preston suggested the idea of just letting it die when it runs out of power.  I thought this might be more complicated than doing a gracefull shutdown (given how often I've seen filesystem/SD card corruption with SBC's that get turned off like this) but given how much trouble detecting the power supply state has turned out to be, this might be worth looking into.
+
+I know that Armbian already stores its logs in a "RAM disk", so at least those won't be writing to disk when we pull the plug, but I'm going to have to poke-around a bit to see what other measures could be taken to allow one of these boards to simply be unplugged and then plugged back in without messing up the O/S.
+
+
