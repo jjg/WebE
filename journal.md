@@ -112,4 +112,6 @@ After digging a bit it turns out that the solution was obvious: run Linux in RAM
 
 If it doesn't work I might just have to wait until I have a Pi to try.
 
+OK, looks like Alpine's [Generic ARM](https://dl-cdn.alpinelinux.org/alpine/v3.15/releases/aarch64/alpine-uboot-3.15.0-aarch64.tar.gz) package might work with [one of the boards I have](https://wiki.alpinelinux.org/wiki/Pine64_A64_LTS).  This would be a lot easier if I could just use a Raspberry Pi, but apparently there are none for sale in the world right now...
+
 
