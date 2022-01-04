@@ -73,3 +73,34 @@ For now I've exposed an experimental website at [solar.jasongullickson.com](http
 * https://github.com/jjg/jsfs
 * https://medium.com/gowombat/tutorial-how-to-use-ssh-tunnel-to-expose-a-local-server-to-the-internet-4e975e1965e5
 * https://www.digitalocean.com/community/tutorials/iptables-essentials-common-firewall-rules-and-commands
+
+
+## 01042022
+
+Last night I was studying the charge controller's schematics and learned that I can actually read the battery voltage (the `BAT` pin next to the `EN` pin) and use it as a proxy for [state-of-charge](https://en.wikipedia.org/wiki/State_of_charge).  This is exciting because I don't have to try and solder new leads to the surface mount LEDs or come up with complex logic to decide when to power-down the SBC.  The downside is that the signal is analog, and the SBC I'm using doesn't have any analog inputs (most Linux SBC's don't) so if I want to use this I'm going to have to either add analog input to the SBC (probably using a [MCP3008](https://www.microchip.com/en-us/product/MCP3008)) or adding another device that has an analog input that can either control the power supply, signal the SBC to control it or maybe both.
+
+I'm leaning toward adding the MCP3008 because there may be other analog signals we'll want to access in the future (temp, light level, etc.) and I really don't want to have yet another codebase (even if it's small), toolchain, etc. to program a microcontroller to do this.  Of course the counterargument is that if a mcu is used, it could do things independent of the SBC (and do so using much less power) so I'm still undecided.  In the long run I can see a custom charge controller that includes an MCU integrated into the board to provide this sort of "supervisor" processor but we're not there yet.
+
+If I don't want to wait for parts I might be able to cobble-together a basic comparitor circuit that could be read like a digital signal (basically an [open collector](https://en.wikipedia.org/wiki/Open_collector) connected to a GPIO pin on the SBC) which would be good enough to tell the SBC when to shutdown.  This might also work to determine when to power the SBC back up, because it could control the 5v out pins on the charge controller (via the `EN` pin).  It might require two comparitors, one to send the "time to shut down" signal and another to actually cut the juice, but I'm pretty sure I have parts on-hand to make something like this to keep moving forward until I can get some MCP3008's.
+
+```
+SPM     SBC       comparator
+
+5V  ->  5V
+5V
+5V
+GND ->  GND
+GND
+GND
+
+GND ------------> gnd
+EN
+BAT ------------> base 
+
+        GPIO  <-  collector
+        GND -----> gnd
+
+```
+
+Hmm... looking at the various DIY comparator options I'm leaning toward just ordering some MCP3008's and going that way, but if something else comes up in the meantime I'll experiment.
+
