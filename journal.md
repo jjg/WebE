@@ -108,4 +108,8 @@ Preston suggested the idea of just letting it die when it runs out of power.  I 
 
 I know that Armbian already stores its logs in a "RAM disk", so at least those won't be writing to disk when we pull the plug, but I'm going to have to poke-around a bit to see what other measures could be taken to allow one of these boards to simply be unplugged and then plugged back in without messing up the O/S.
 
+After digging a bit it turns out that the solution was obvious: run Linux in RAM like a USB boot drive.  Turns out this is the default mode of operation for [Alpine Linux on Raspberry Pi](https://wiki.alpinelinux.org/wiki/Raspberry_Pi) so this might just do the trick (assuming you're using a pi).  In my case I'm using a different SBC at the moment, but I'll give it a try and see what happens.
+
+If it doesn't work I might just have to wait until I have a Pi to try.
+
 
