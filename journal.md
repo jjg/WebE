@@ -142,6 +142,20 @@ Since I don't want to break the host I'm using for solar.jasongullickson.com by 
   + Had to add sd card to fstab before `lbu commit -d` would work
   + Add home directories to backup: `lbu include /home` `lbu commit`
 3. Setup JSFS and test JSFS API locally, then over WiFi
+  + Add USB storage
+    + `apk add btrfs.progs`
+    + `apk add wipefs`
+    + `wipefs -a /dev/sda`
+    + `fdisk /dev/sda`
+    + `mkfs.btrfs /dev/sda1`(UUID: 66892c45-2a10-4382-b883-69714f24a83f)
+    + `btrfs device scan`
+    + `mount /dev/sda1 /media/usb/`
+    +  Add to fstab:
+    + `UUID=66892c45-2a10-4382-b883-69714f24a83f       /media/usb      btrfs   defaults        0 0`
+  + `apk add nodejs`, `apk add npm`
+  + `git clone https://github.com/jjg/jsfs.git`
+    + This could probably be more efficient if everything was stored on the USB flash
+  + `npm install` `npm start`
 4. Setup ssh tunnel to existing public host (new port)
 5. Test public access
 6. Test pulling the plug
@@ -150,3 +164,22 @@ Since I don't want to break the host I'm using for solar.jasongullickson.com by 
   + Keep the Rock64 online, we'll use it to test the load balancer & federation later
 
 Once this works we can start setting up the new public host with HA proxy, etc.
+
+I got JSFS running, but found after a reboot `npm`, `node`, etc. were no longer installed.  I'm guessing these are not preserved by `lbu`.  That's OK, because I think it would be smarter to do a stand-alone build of everything JSFS needs to run and copy it to the USB drive, that way the files are not taking up space in the RAM filesystem, etc.
+
+Might also make everything more portable, honestly.  Hmm...
+
+The other thing I need to figure out is how to properly start jsfs, the ssh tunnel, etc. at boot.  I have service files for systemd but it looks like Alpine uses something called [openrc](https://github.com/OpenRC/openrc/blob/master/service-script-guide.md) which I haven't worked with before (but it kind of looks like old-fashioned init.d scripts).
+
+
+
+
+### References
+
+* https://www.thegeekdiary.com/centos-rhel-how-to-create-and-mount-btrfs-file-system-explained-with-examples/
+* https://nparsons.uk/blog/using-btrfs-on-alpine-linux
+* https://garrit.xyz/posts/2021-12-31-btrfs-on-alpine
+* https://wiki.alpinelinux.org/wiki/Filesystems
+* https://www.centennialsoftwaresolutions.com/post/erase-and-w95-fat32-lba-format-an-sd-card-from-the-command-line
+* https://wiki.alpinelinux.org/wiki/Create_a_Bootable_Device#CF_card_readers
+* https://wiki.alpinelinux.org/wiki/Raspberry_Pi
