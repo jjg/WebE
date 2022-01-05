@@ -171,7 +171,9 @@ Might also make everything more portable, honestly.  Hmm...
 
 The other thing I need to figure out is how to properly start jsfs, the ssh tunnel, etc. at boot.  I have service files for systemd but it looks like Alpine uses something called [openrc](https://github.com/OpenRC/openrc/blob/master/service-script-guide.md) which I haven't worked with before (but it kind of looks like old-fashioned init.d scripts).
 
+Figured out I needed to enable the package cache: https://wiki.alpinelinux.org/wiki/Alpine_Linux_package_management#Local_Cache
 
+I did this, reinstalled node (which reinstalled everything?) and then ran `lbu commit` and rebooted.  Now node, etc. are there, nice!
 
 
 ### References
