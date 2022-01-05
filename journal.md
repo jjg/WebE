@@ -141,7 +141,7 @@ Since I don't want to break the host I'm using for solar.jasongullickson.com by 
   + Hostname: webe-solar-2.local (10.1.10.106)
   + Had to add sd card to fstab before `lbu commit -d` would work
   + Add home directories to backup: `lbu include /home` `lbu commit`
-3. Setup JSFS and test JSFS API locally, then over WiFi
+3. ~~Setup JSFS and test JSFS API locally, then over WiFi~~
   + Add USB storage
     + `apk add btrfs.progs`
     + `apk add wipefs`
