@@ -119,7 +119,7 @@ OK, looks like Alpine's [Generic ARM](https://dl-cdn.alpinelinux.org/alpine/v3.1
 
 Thought of a fairly simple way to provide access to the nodes as they come and go with the sunshine.
 
-!(solar/docs/public_proxy.png)
+![](solar/docs/public_proxy.png)
 
 By adding [HA Proxy](http://www.haproxy.org/) to the existing public host (the place the SSH tunnel terminates) we can setup each node to open an ssh tunnel to the host and then loadbalance requests from a single public address across all of the solar nodes that happen to be up at the time.  HA Proxy can be configured to perform a health check against each configured node so when nodes go off/online, incoming requests are automatically routed to whatever nodes are up at the time.
 
