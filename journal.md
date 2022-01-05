@@ -131,6 +131,11 @@ Since I don't want to break the host I'm using for solar.jasongullickson.com by 
 ### Next Steps
 
 1. Create a Raspberry Pi Alpine SD card
+  + `sudo wipefs -a /dev/sda`
+  + `sudo fdisk /dev/sda`
+  + o, n, enter, enter, enter, t, c, w
+  + `sudo mkdosfs -F 32 /dev/sda1`
+  + Mount SD card and extract contents of Alpine tar to its root
 2. Boot a Raspberry Pi 3 Model A (+?) with the card and see if we can set it up over serial
 3. Setup JSFS and test JSFS API locally, then over WiFi
 4. Setup ssh tunnel to existing public host (new port)
