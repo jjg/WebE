@@ -130,13 +130,17 @@ Since I don't want to break the host I'm using for solar.jasongullickson.com by 
 
 ### Next Steps
 
-1. Create a Raspberry Pi Alpine SD card
+1. ~~Create a Raspberry Pi Alpine SD card~~
   + `sudo wipefs -a /dev/sda`
   + `sudo fdisk /dev/sda`
-  + o, n, enter, enter, enter, t, c, w
+  + o, n, enter, enter, enter, t, c, <mark bootable> w
   + `sudo mkdosfs -F 32 /dev/sda1`
   + Mount SD card and extract contents of Alpine tar to its root
-2. Boot a Raspberry Pi 3 Model A (+?) with the card and see if we can set it up over serial
+2. ~~Boot a Raspberry Pi 3 Model A (+?) with the card and see if we can set it up over serial~~
+  + Couldn't get serial to work, but monitor and keyboard worked fine
+  + Hostname: webe-solar-2.local (10.1.10.106)
+  + Had to add sd card to fstab before `lbu commit -d` would work
+  + Add home directories to backup: `lbu include /home` `lbu commit`
 3. Setup JSFS and test JSFS API locally, then over WiFi
 4. Setup ssh tunnel to existing public host (new port)
 5. Test public access
