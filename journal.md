@@ -128,5 +128,16 @@ Ideally this would be 100% dynamic (nodes join using auto-generated ports with n
 Since I don't want to break the host I'm using for solar.jasongullickson.com by installimg HA Proxy (it's already running other things), I think its time to setup a dedicated public host for this project.  That will also let me put the public interface on port 80 which most clients expect.
 
 
+### Next Steps
 
+1. Create a Raspberry Pi Alpine SD card
+2. Boot a Raspberry Pi 3 Model A (+?) with the card and see if we can set it up over serial
+3. Setup JSFS and test JSFS API locally, then over WiFi
+4. Setup ssh tunnel to existing public host (new port)
+5. Test public access
+6. Test pulling the plug
+  + Maybe setup a scheduled curl to poll the system as it goes up and down?
+7. If power failure recovery looks good, swap the boards
+  + Keep the Rock64 online, we'll use it to test the load balancer & federation later
 
+Once this works we can start setting up the new public host with HA proxy, etc.
