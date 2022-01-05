@@ -115,3 +115,18 @@ If it doesn't work I might just have to wait until I have a Pi to try.
 OK, looks like Alpine's [Generic ARM](https://dl-cdn.alpinelinux.org/alpine/v3.15/releases/aarch64/alpine-uboot-3.15.0-aarch64.tar.gz) package might work with [one of the boards I have](https://wiki.alpinelinux.org/wiki/Pine64_A64_LTS).  This would be a lot easier if I could just use a Raspberry Pi, but apparently there are none for sale in the world right now...
 
 
+## 01052022
+
+Thought of a fairly simple way to provide access to the nodes as they come and go with the sunshine.
+
+!(solar/docs/public_proxy.png)
+
+By adding [HA Proxy](http://www.haproxy.org/) to the existing public host (the place the SSH tunnel terminates) we can setup each node to open an ssh tunnel to the host and then loadbalance requests from a single public address across all of the solar nodes that happen to be up at the time.  HA Proxy can be configured to perform a health check against each configured node so when nodes go off/online, incoming requests are automatically routed to whatever nodes are up at the time.
+
+Ideally this would be 100% dynamic (nodes join using auto-generated ports with no up-front configuration of HA Proxy) but I don't know how to do that yet so it will have to be configured manually for now.
+
+Since I don't want to break the host I'm using for solar.jasongullickson.com by installimg HA Proxy (it's already running other things), I think its time to setup a dedicated public host for this project.  That will also let me put the public interface on port 80 which most clients expect.
+
+
+
+
