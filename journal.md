@@ -185,3 +185,65 @@ I did this, reinstalled node (which reinstalled everything?) and then ran `lbu c
 * https://www.centennialsoftwaresolutions.com/post/erase-and-w95-fat32-lba-format-an-sd-card-from-the-command-line
 * https://wiki.alpinelinux.org/wiki/Create_a_Bootable_Device#CF_card_readers
 * https://wiki.alpinelinux.org/wiki/Raspberry_Pi
+
+
+## 01062022
+
+What's Next?
+
+* ~~Test the ssh tunnel~~
+* Setup the dedicated gateway node
+* ~~Start JSFS, ssh tunnel at boot~~
+  + Write a script to start JSFS
+  + Copy the script into /etc/local.d
+* ~~Physically install the pi on the solar hardware~~
+* ~~Place the system somewhere it can get regular sunlight~~
+* Write a cron job to log uptime
+
+Alpine will run the scripts in the `/etc/local.d` directory at startup, so I'm going to try and create a very simple script to start JSFS and if that works do the same for the tunnel.
+
+`jsfs-server.start`:
+```
+#!/bin/ash
+cd /home/jason/jsfs && npm start
+```
+No dice, let's try the full path to `npm`.
+
+Still no good.  Oh, forgot a step: `rc-update add local default`
+
+That did it!  Now let's see if we can get the tunnel up.
+
+Hmm... can't find `autossh` in the package manager, do I have to build it from source?  I'm not sure I want to do that in the constrained environment...hmm.
+
+For now I might just try using regular `ssh` and see what happens.  Then I'll see if I can find a packaged copy of `autossh` for Alpine, otherwise I'm going to have to install a full-blown buildchain in RAM to compile it from source...
+
+This script works when run by hand, so let's copy to the `/etc/local.d` directory and reboot.  No joy.
+
+Found some useful commands for tshooting the local service:
+
+* `rc-service local start` starts (or `stop` stops) the services in `/etc/local.d`
+* Adding `rc_verbose=yes` to `/etc/conf.d/local` turns on logging for these services
+
+Tunnel comes up when run like this, but won't come up at boot.  After thinking about it I realized that the /root directory isn't included in the backup (`lbu`) and as such maybe the ssh auth info isn't getting persisted?  Let's add that and try again: `lbu include /root`, `lbu commit`.
+
+That worked!  Now to turn-down logging and see if we can move-over the data from the old server...
+
+Copied the contents of the `blocks1` and `blocks2` directories from the Rock64 into the `blocks` directory on the rpi and the original content was immediately available at http://solar.jasongullickson.com:2022/index.html !
+
+I forget how easy jsfs makes things like this.
+
+Time to power-down and swap the hardware.
+
+SBC's swapped, powered back up, everything still looks good.  At this point we are 100% on solar power!
+
+The last thing I'd like to do is setup a cron job to log once per minute while the node is up so I can get some idea of when the node is avaliable or not.  Ideally this would log to the local JSFS instance but we'll see.
+
+
+
+### References
+
+* https://lists.alpinelinux.org/~alpine/devel/%3CCAF-%2BOzABh_NPrTZ2oMFUKrsYmSE5obOadKTAth1HU5_OEZUxPQ%40mail.gmail.com%3E
+* https://wiki.gentoo.org/wiki//etc/local.d
+* https://wiki.gentoo.org/wiki/Handbook:AMD64/Working/Initscripts#Writing_initscripts
+* https://github.com/jonhiggs/autossh
+* https://wiki.alpinelinux.org/wiki/Writing_Init_Scripts

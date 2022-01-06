@@ -1,0 +1,2 @@
+#!/bin/ash
+cd /home/jason/jsfs && /usr/bin/npm start &

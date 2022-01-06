@@ -1,0 +1,2 @@
+#!/bin/ash
+/usr/bin/ssh -N -i /home/jason/.ssh/id_rsa_tunnel jason@theneuromantics.net -R 2022:localhost:7302 -C &
