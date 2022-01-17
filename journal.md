@@ -272,3 +272,23 @@ GND ->                  GND
 * https://wiki.dfrobot.com/Beetle_CM_32U4_SKU_DFR0816
 * https://wiki.dfrobot.com/Solar_Power_Manager_5V_SKU__DFR0559
 
+
+## 01172022
+
+Wired-up the new hardware to monitor battery voltage and only enable the regulator (SBC power) when there's enough charge in the battery to boot safely.
+
+Reading the `BAT` pin using pin `A0` on the MCU, a value of about 740 indicates the battery is at 3.6v.  This is just under the battery's rated voltage of 3.7 so it's pretty close to full.
+
+Using this value as the threshold for enabling the regulator, the SBC boots sucesfully and the website goes back online seamlessly.  While the SBC is running, the battery stays around 740 if I leave the charger connected to a steady 5v supply (USB), but I doubt this will be the case when running off solar power, so I'll probably need to reduce this value some if the system is ever to reach the enable threshold when running off the panel.
+
+I don't know exactly how to calculate the relationship between the analog pin value and the battery voltage yet so I'm just going to guess and set the threshold to say... 400, and see if the system boots sucessfully from solar power.
+
+There is a public status page here [https://statuspage.freshping.io/59266-WebE](https://statuspage.freshping.io/59266-WebE).
+
+After some experimenting I found that we need a shutdown threshold as well, otherwise we have the same flailing problem as the battery empties as we do at boot.  I tried a few things and picked 700 for power-on and 400 for power-down.  I'd also like to add some averaging in there to smooth out spikes, but one thing at a time.
+
+This all worked well while running the MCU connected to my laptop but when I powered it from the USB port on the charging board things didn't go so well.  The MCU kept flashing the LED like it does when it first comes on (maybe the bootloader does this?).  After some troubleshooting it appears that for some reason the MCU resets whenever it tries to enable the SBC's regulator, but it does this just fine when it's powered from my laptop, or even a separate 5v USB supply?
+
+I'm not sure what's causing this.  My first guess was a "brownout" when the regulator comes on, but the same thing happens when the charging board has a steady 5v USB supply so I don't think that's it.  Maybe there is something in the wiring that causes this, but based on the examples in the dfrobot wiki it should work fine?
+
+Not sure, but for now I'm going to park it until I can review the schematics for all the boards and see if something jumps out at me.
