@@ -292,3 +292,43 @@ This all worked well while running the MCU connected to my laptop but when I pow
 I'm not sure what's causing this.  My first guess was a "brownout" when the regulator comes on, but the same thing happens when the charging board has a steady 5v USB supply so I don't think that's it.  Maybe there is something in the wiring that causes this, but based on the examples in the dfrobot wiki it should work fine?
 
 Not sure, but for now I'm going to park it until I can review the schematics for all the boards and see if something jumps out at me.
+
+
+## 01242022
+
+I had an idea over the weekend about what might be causing the MCU to reset when it turns on the regulator and it's being powered by the solar charging board's USB port. I wonder if the immediate power draw of the SBC is so great that it causes the power to the charging boards USB port to drop (either sag or just get completely cut-off) even for an instant, which might be enough to cause it to reset.  If so, that reset would cause the regulator to get shut-down, causing the MCU to boot correctly, turn on the regulator and then wash, rinse, repeat.
+
+So I'm going to do a couple tests to see if this is the cause, starting with the simplest thing I can think of.  I'm going to change the `batteryPowerOnThreshold` to the maximum value we get reading the battery voltage.  This should mean that the battery is full and I would hope that is enough to power the SBC during boot.  This isn't a long-term solution (it would mean the node is offline for a large part of the sunlight hours) but if it works at least I'll know I'm on the right path and I can come up with a way to mitigate this (maybe a big cap on the USB output?).
+
+A side-effect of this approach is that I should be able to establish what `analogRead()` value is equal to the maximum battery voltage (3.7vdc) and maybe I can come up with a way to convert that so I can work with voltages instead of arbitrary integers in the code.
+
+If this doesn't work I'll have to take some actual measurements at the USB port to see if anything funky is happening with the power supply even with a full battery.  I have a small [Adafruit board](https://www.adafruit.com/product/1549) that make that a little easier, but it's still going to take a fair amount of messing-around so I'm hoping to avoid going that far.
+
+```
+827 = 4.16vdc
+805 = 4.08
+799 = 4.06
+768 = 3.91
+740 = 3.76
+739 = 3.75
+750  = 3.5
+680  = 3.4 (cell dead)
+```
+
+Duh, this is simple.  Divide the voltage by 5 and it will equal the integer value returned by `analogRead()`.
+
+While waiting for battery to charge, current MCU firmware draws about 40mA.
+
+So I think we can say for sure that the USB power is dropping when the regulator is switched on.
+
+
+Stuff to figure out:
+
+* What is the minimum voltage the regulator needs to supply the SBC with 5v (and enough amps)?
+* What can I do to reduce the amount of power the SBC needs at boot?
+* What can I do to reduce the MCU's draw (especially after the SBC boots)?
+
+### References
+
+* https://www.large.net/news/8au43pv.html
+* https://www.adafruit.com/product/1549

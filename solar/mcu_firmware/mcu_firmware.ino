@@ -4,13 +4,13 @@ int ledPin = 13;
 int batteryPin = A0;
 int regulatorPin = 9;
 int batteryValue = 0;
-int batteryPowerOnThreshold = 700;
-int batteryPowerOffThreshold = 400;
+int batteryPowerOnThreshold = 800;  // 3.7v lithium fully charged at 840 (4.2v)
+int batteryPowerOffThreshold = 690; // 3.7v lithium considered dead at 680 (3.4v)
 
 void setup() {
 
-  //Serial.begin(9600);
-  //pinMode(batteryPin, INPUT);
+  Serial.begin(9600);
+  pinMode(batteryPin, INPUT);
 
 }
 
@@ -20,7 +20,7 @@ void loop() {
   batteryValue = analogRead(batteryPin);
 
   // Log battery voltage value to serial.
-  //Serial.println(batteryValue);
+  Serial.println(batteryValue);
 
   // TODO: Would probably be better to test the average of the last n measurements
   // to smooth-out spikes when the SBC load changes.
@@ -33,6 +33,7 @@ void loop() {
   }
 
   //  check again in one second (TODO: Change to one minute if not testing).
-  delay(60000);
+  //delay(60000);
+  delay(1000);
 
 }
