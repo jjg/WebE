@@ -294,6 +294,48 @@ I'm not sure what's causing this.  My first guess was a "brownout" when the regu
 Not sure, but for now I'm going to park it until I can review the schematics for all the boards and see if something jumps out at me.
 
 
+
+## 01212022
+
+For some reason things are working now, I didn't change anything, but I'm not going to complain.
+
+While the hardware is cooperating I'm going to switch over to the software side for a bit.  I've procured a domain name (web-e.org) that I can use for the public-facing site so now is a good time to set things up in a more permanent way:
+
+* Setup a public server to serve as a gateway
+  + ~~Create smallest Digitalocean node possible~~
+  + ~~Setup ssh key login from webe-solor-2 (10.1.10.106)~~
+    + Create a user for the tunnel: `adduser jason`
+    + `su jason`
+    + On webe-solar-2, copy id_rsa_tunnnel.pub contents to ./ssh/authorized_keys
+    + Test login from webe-solar-2 to web-e.org: `ssh -i ~/.ssh/id_rsa_tunnel jason@web-e.org`
+  + ~~Configure firewall to allow port 80 in~~
+    + `apt install ufw`
+    + `ufw default deny incoming`
+    + `ufw default allow outgoing`
+    + `ufw allow ssh`
+    + `ufw enable`
+    + `ufw status`
+  + ~~Test connecting tunnel from webe-solar-2 to port 2022 on the gateway node~~
+* ~~Setup haproxy to route traffic to solar-powered nodes~~
+  + Install haproxy
+  + Add rules to route port 80 to avaliable solar node tunnels (just one for now, 2022)
+* ~~Modify ssh tunnel to connect to dedicated gateway~~
+  + Modify scripts in /etc/local.d on webe-solar-2
+  + Save the changes using `lbu commit`
+* ~~Modify DNS for web-e.org to point at gateway~~
+
+It occurs to me that it might make sense to add a simple local webserver that we can direct requests to when there's no solar-powered nodes online to direct traffic to.  Sort of like a 404, but for when the entire network is offline.
+
+At this point there should be a fairly stable public presense for WebE at [web-e.org](http://web-e.org/).
+
+### References
+
+* https://www.haproxy.com/blog/exploring-the-haproxy-stats-page/
+* https://www.haproxy.com/blog/haproxy-configuration-basics-load-balance-your-servers/
+* https://www.digitalocean.com/community/tutorials/how-to-set-up-a-firewall-with-ufw-on-debian-10
+
+
+
 ## 01242022
 
 I had an idea over the weekend about what might be causing the MCU to reset when it turns on the regulator and it's being powered by the solar charging board's USB port. I wonder if the immediate power draw of the SBC is so great that it causes the power to the charging boards USB port to drop (either sag or just get completely cut-off) even for an instant, which might be enough to cause it to reset.  If so, that reset would cause the regulator to get shut-down, causing the MCU to boot correctly, turn on the regulator and then wash, rinse, repeat.
