@@ -361,7 +361,9 @@ Duh, this is simple.  Divide the voltage by 5 and it will equal the integer valu
 
 While waiting for battery to charge, current MCU firmware draws about 40mA.
 
-So I think we can say for sure that the USB power is dropping when the regulator is switched on.
+So I think we can say for sure that the USB power is dropping when the regulator is switched on.  Now I need to figure out why, and what can be done about it?
+
+My current (ha) theory is that this should work (there is an example circuit on the charger board's Wiki that uses a similar setup), so maybe the SBC just draws too much current at start-up and sags the power at the USB connector enough to reset the MCU.  I'm going to test this by removing the SBC and replace it with a much smaller load (maybe just an LED?) and see if the same thing happens when the regulator is switched on.
 
 
 Stuff to figure out:
@@ -369,6 +371,7 @@ Stuff to figure out:
 * What is the minimum voltage the regulator needs to supply the SBC with 5v (and enough amps)?
 * What can I do to reduce the amount of power the SBC needs at boot?
 * What can I do to reduce the MCU's draw (especially after the SBC boots)?
+
 
 ### References
 
