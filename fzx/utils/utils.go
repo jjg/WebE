@@ -1,10 +1,19 @@
 package utils
 
 import (
+	"crypto/sha1"
 	"fmt"
 	"net/http"
 	"strings"
 )
+
+// TODO: Write a test for this function.
+func StringToSha1(in string) string {
+	h := sha1.New()
+	h.Write([]byte(in))
+	bs := h.Sum(nil)
+	return fmt.Sprintf("%x", bs)
+}
 
 func Reverse(input []string) {
 	for i, j := 0, len(input)-1; i < j; i, j = i+1, j-1 {
