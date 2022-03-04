@@ -4,6 +4,8 @@ import (
 	"io"
 	"log"
 	"net/http"
+
+	"github.com/jjg/WebE/fzx/utils"
 )
 
 // TODO: Move these to flags, env, etc.
@@ -14,10 +16,20 @@ const (
 
 func Handler(w http.ResponseWriter, req *http.Request) {
 
+	var err error
+	var fzxPath string
+
 	// DEBUG
 	log.Print(req)
 
-	// TODO: Translate DNS name to fzx namespace.
+	// Translate DNS name to fzx namespace.
+	if fzxPath, err = utils.FzxPathFromRequest(req); err != nil {
+		// TODO: Return error to caller and eject.
+		log.Printf("Error extracting fzx path from request: %v", err)
+	}
+
+	log.Printf("fzx path: %v", fzxPath)
+
 	// TODO: Try to load inode.
 	// TODO: Check authorization.
 	// TODO: Set default response status code.

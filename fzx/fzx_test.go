@@ -22,6 +22,8 @@ func TestRequestMethods(t *testing.T) {
 		{http.MethodPost, "http://example.com"},
 		{http.MethodPut, "http://example.com"},
 		{http.MethodDelete, "http://example.com"},
+		// NOTE: EXECUTE is a made-up method specific to fzx,
+		// maybe we'll create an RFC for it once this takes off...
 		{"EXECUTE", "http://example.com"},
 	}
 
