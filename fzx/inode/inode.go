@@ -4,14 +4,26 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"time"
 
 	"github.com/jjg/WebE/fzx/utils"
 )
 
 type Inode struct {
-	FzxPath         string
-	Fingerprint     string
-	StorageLocation string
+	FzxPath          string
+	Fingerprint      string
+	StorageLocation  string
+	Created          time.Time
+	Version          int
+	Private          bool
+	Encrypted        bool
+	AccessKey        string
+	ContentType      string
+	FileSize         int
+	BlockSize        int
+	BlocksReplicated int
+	InodeReplicated  int
+	Blocks           []string
 }
 
 func (i *Inode) Save() error {
