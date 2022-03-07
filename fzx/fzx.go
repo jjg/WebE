@@ -51,7 +51,6 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 		// TODO: Add/update response-specific headers, status.
 	case "PUT":
 		log.Print("Got PUT")
-		// TODO: Handle PUT request
 		// NOTE: This is probably identical to POST.
 		// TODO: Write blocks.
 		// TODO: Write inode.
