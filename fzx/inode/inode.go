@@ -27,6 +27,7 @@ type Inode struct {
 }
 
 func (i *Inode) Save() error {
+
 	var err error
 	var inodeJson []byte
 
@@ -52,10 +53,21 @@ func (i *Inode) Load(storageLocation string, fzxPath string) error {
 	i.Fingerprint = utils.StringToSha1(i.FzxPath)
 
 	inodeFilename := fmt.Sprintf("%v/%v.json", i.StorageLocation, i.Fingerprint)
-	inodeJson, err = ioutil.ReadFile(inodeFilename)
+	if inodeJson, err = ioutil.ReadFile(inodeFilename); err != nil {
+		return err
+	}
+
 	if err = json.Unmarshal([]byte(inodeJson), i); err != nil {
 		return err
 	}
 
 	return err
+}
+
+func (i *Inode) JsonString() (string, error) {
+	if inodeJson, err := json.Marshal(i); err != nil {
+		return "", err
+	} else {
+		return string(inodeJson), err
+	}
 }

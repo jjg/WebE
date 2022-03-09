@@ -1,10 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"net/http"
 
+	"github.com/jjg/WebE/fzx/inode"
 	"github.com/jjg/WebE/fzx/utils"
 )
 
@@ -24,53 +26,79 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 
 	// Translate DNS name to fzx namespace.
 	if fzxPath, err = utils.FzxPathFromRequest(req); err != nil {
-		// TODO: Return error to caller and eject.
 		log.Printf("Error extracting fzx path from request: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
 	}
 
-	log.Printf("fzx path: %v", fzxPath)
-
-	// TODO: Try to load inode.
-	// TODO: Check authorization.
-	// TODO: Set default response status code.
-	// TODO: Set default response headers.
+	// Try to load inode (it's OK if this fails for POST/PUT/etc.).
+	anInode := &inode.Inode{FzxPath: fzxPath, StorageLocation: STORAGE_LOCATION}
+	if err := anInode.Load(STORAGE_LOCATION, fzxPath); err != nil {
+		log.Printf("Error loading inode for %v, %v", fzxPath, err)
+	}
 
 	switch req.Method {
 	case "HEAD":
 		log.Print("Got HEAD")
-		// TODO: Add/update response-specific headers, status.
+		// TODO: Check to see if inode was actually loaded.
+		// TODO: Check authorization.
+
+		// Set headers using inode data.
+		w.Header().Add("FzxPath", anInode.FzxPath)
+		// TODO: Set additional headers.
+
+		// Return result.
+		w.WriteHeader(http.StatusOK)
 	case "GET":
 		log.Print("Got GET")
+		// TODO: Check to see if inode was actually loaded.
+		// TODO: Check authorization.
+
+		// Set headers using inode data.
+		w.Header().Add("FzxPath", anInode.FzxPath)
+		// TODO: Set additional headers.
+
 		// TODO: Locate blocks.
-		// TODO: Add/update response-specific headers, status.
 		// TODO: Return blocks.
+
+		// Return result.
+		w.WriteHeader(http.StatusOK)
 	case "POST":
 		log.Print("Got POST")
+		// TODO: Check authorization.
 		// TODO: Write blocks.
-		// TODO: Write inode.
-		// TODO: Add/update response-specific headers, status.
+
+		// Write inode.
+		if err := anInode.Save(); err != nil {
+			log.Print(err)
+		}
+
+		// Return result.
+		if s, err := anInode.JsonString(); err != nil {
+			log.Print(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			io.WriteString(w, fmt.Sprintf("Error parsing inode: %v", err))
+		} else {
+			w.WriteHeader(http.StatusCreated)
+			io.WriteString(w, s)
+		}
 	case "PUT":
 		log.Print("Got PUT")
 		// NOTE: This is probably identical to POST.
-		// TODO: Write blocks.
-		// TODO: Write inode.
-		// TODO: Add/update response-specific headers, status.
 	case "DELETE":
 		log.Print("Got DELETE")
-		// TODO: Delete inode
-		// TODO: Add/update response-specific headers, status.
+		// TODO: Check authorization.
+		// TODO: Delete inode.
+		// TODO: Return result.
 	case "EXECUTE":
 		log.Print("Got EXECUTE")
+		// TODO: Check authorization.
 		// TODO: Handle EXECUTE request.
 		// TODO: Execute specified binary.
 		// TODO: Return output.
-		// TODO: Add/update response-specific headers, status.
 	default:
 		log.Printf("I don't know what to do with method %v", req.Method)
+		w.WriteHeader(http.StatusNotImplemented)
 	}
-
-	// TODO: Finalize response (flush buffers, etc.).
-	io.WriteString(w, "Hello, world!\n")
 }
 
 func main() {
