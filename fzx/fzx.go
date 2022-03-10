@@ -43,8 +43,10 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 		// TODO: Check authorization.
 
 		// Set headers using inode data.
-		w.Header().Add("FzxPath", anInode.FzxPath)
-		// TODO: Set additional headers.
+		w.Header().Add("Content-Type", anInode.ContentType)
+		// TODO: Determine if FileSize is really equivalent here, and if so consider renaming it.
+		w.Header().Add("Content-Length", fmt.Sprintf("%v", anInode.FileSize))
+		// TODO: Set additional headers?
 
 		// Return result.
 		w.WriteHeader(http.StatusOK)

@@ -3,7 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"log"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -45,6 +45,9 @@ func TestReadMethods(t *testing.T) {
 
 func TestPostPut(t *testing.T) {
 
+	// Mute output while running tests.
+	defer quiet.BeQuiet()()
+
 	testFileUrl := "http://localhost:7302/testing/posttest.txt"
 	testFileFzxPath := ".localhost:7302/testing/posttest.txt"
 	testFileContents := "A plain text file to test the POST and PUT methods."
@@ -65,42 +68,41 @@ func TestPostPut(t *testing.T) {
 
 	// POST the file.
 	req := httptest.NewRequest(http.MethodPost, testFileUrl, f)
-	w := httptest.NewRecorder()
+	postRecorder := httptest.NewRecorder()
 
-	Handler(w, req)
+	Handler(postRecorder, req)
 
 	// POST should return a string of JSON data with details about what was stored.
 	// To use this for testing, we need to extract the body and parse the JSON.
 	buf := new(bytes.Buffer)
-	buf.ReadFrom(w.Result().Body)
+	buf.ReadFrom(postRecorder.Result().Body)
 	postRequestResultBody := buf.String()
 	i := &inode.Inode{}
 	if err = json.Unmarshal([]byte(postRequestResultBody), i); err != nil {
 		t.Fatal(err)
 	}
 
-	assert.Equal(t, http.StatusCreated, w.Result().StatusCode)
+	assert.Equal(t, http.StatusCreated, postRecorder.Result().StatusCode)
 	assert.Equal(t, testFileFzxPath, i.FzxPath)
 	// TODO: Consider additional checks to validate POST response JSON.
 
 	// Make a HEAD request and test the metadata.
 	req = httptest.NewRequest(http.MethodHead, testFileUrl, nil)
+	headRecorder := httptest.NewRecorder()
 
-	Handler(w, req)
+	Handler(headRecorder, req)
 
-	log.Print(w.Result().Header["FzxPath"])
+	assert.Equal(t, http.StatusOK, headRecorder.Result().StatusCode)
+	assert.Equal(t, i.ContentType, headRecorder.Result().Header["Content-Type"][0])
+	// NOTE: Using Sprintf to convert between int and string seems dumb.
+	assert.Equal(t, fmt.Sprintf("%v", i.FileSize), headRecorder.Result().Header["Content-Length"][0])
 
-	assert.Equal(t, http.StatusOK, w.Result().StatusCode)
-	assert.Equal(t, i.FzxPath, w.Result().Header["FzxPath"])
-	// TODO: Compare additional values returned by POST request to headers.
+	// Make a GET request and test the contents.
+	req = httptest.NewRequest(http.MethodGet, testFileUrl, nil)
+	getRecorder := httptest.NewRecorder()
 
-	/*
-		// Make a GET request and test the contents.
-		req = httptest.NewRequest(http.MethodGet, testFileUrl, nil)
+	Handler(getRecorder, req)
 
-		Handler(w, req)
-
-		assert.Equal(t, http.StatusOK, w.Result().StatusCode)
-		assert.Equal(t, testFileContents, w.Body.String())
-	*/
+	assert.Equal(t, http.StatusOK, getRecorder.Result().StatusCode)
+	assert.Equal(t, testFileContents, getRecorder.Body.String())
 }
