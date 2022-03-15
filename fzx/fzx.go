@@ -1,10 +1,13 @@
 package main
 
 import (
+	"bufio"
+	"bytes"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/jjg/WebE/fzx/inode"
 	"github.com/jjg/WebE/fzx/utils"
@@ -64,10 +67,49 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 
 		// Return result.
 		w.WriteHeader(http.StatusOK)
+
 	case "POST":
 		log.Print("Got POST")
+
 		// TODO: Check authorization.
-		// TODO: Write blocks.
+
+		// Write blocks.
+		log.Print("Begin processing uploaded data.")
+
+		// TODO: Move this to flags, config, etc.
+		var blockSize int64
+		blockSize = 8
+
+		// Generate a hash of the block data to use as a block filename.
+		// TODO: There's got to be a better way to init this than using an empty string...
+		blockDataToHash := bytes.NewBufferString("")
+		if _, err := io.CopyN(blockDataToHash, req.Body, blockSize); err != nil {
+			log.Fatal(err)
+		}
+
+		// DEBUG
+		log.Print(blockDataToHash)
+
+		// Open block file.
+		blockF, err := os.Create("blockhash.blk")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		blockW := bufio.NewWriter(blockF)
+		defer blockF.Close()
+
+		log.Print("Block file created.")
+
+		// Read one block worth of bytes out of req.Body into block file
+		//if blockBytesWritten, err := io.CopyN(blockW, req.Body, blockSize); err != nil {
+		if blockBytesWritten, err := io.CopyN(blockW, blockDataToHash, blockSize); err != nil {
+			log.Fatal(err)
+		} else {
+			log.Printf("%v bytes written to blockfile", blockBytesWritten)
+		}
+
+		// TODO: Keep reading & writing blocks until EOF.
 
 		// Write inode.
 		if err := anInode.Save(); err != nil {

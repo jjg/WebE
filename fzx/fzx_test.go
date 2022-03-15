@@ -10,14 +10,13 @@ import (
 	"testing"
 
 	"github.com/jjg/WebE/fzx/inode"
-	"github.com/jjg/WebE/fzx/utils"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestReadMethods(t *testing.T) {
 
 	// Mute output while running tests.
-	defer utils.BeQuiet()()
+	//defer utils.BeQuiet()()
 
 	cases := []struct {
 		method string
@@ -46,7 +45,7 @@ func TestReadMethods(t *testing.T) {
 func TestPostPut(t *testing.T) {
 
 	// Mute output while running tests.
-	defer utils.BeQuiet()()
+	//defer utils.BeQuiet()()
 
 	testFileUrl := "http://localhost:7302/testing/posttest.txt"
 	testFileFzxPath := ".localhost:7302/testing/posttest.txt"
@@ -66,8 +65,13 @@ func TestPostPut(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	// Re-open the file so we can POST it.
+	// TODO: There *must* be a better way to do this...
+	f2, _ := os.Open(f.Name())
+	defer f2.Close()
+
 	// POST the file.
-	req := httptest.NewRequest(http.MethodPost, testFileUrl, f)
+	req := httptest.NewRequest(http.MethodPost, testFileUrl, f2)
 	postRecorder := httptest.NewRecorder()
 
 	Handler(postRecorder, req)
