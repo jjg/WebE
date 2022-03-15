@@ -3,7 +3,9 @@ package utils
 import (
 	"crypto/sha1"
 	"fmt"
+	"log"
 	"net/http"
+	"os"
 	"strings"
 )
 
@@ -47,4 +49,20 @@ func FzxPathFromRequest(r *http.Request) (string, error) {
 
 	// Add the path and return.
 	return fmt.Sprintf("%v%v", reversedHost, path), err
+}
+
+// Hides output from fmt, log, etc.
+func BeQuiet() func() {
+	null, _ := os.Open(os.DevNull)
+	sout := os.Stdout
+	serr := os.Stderr
+	os.Stdout = null
+	os.Stderr = null
+	log.SetOutput(null)
+	return func() {
+		defer null.Close()
+		os.Stdout = sout
+		os.Stderr = serr
+		log.SetOutput(os.Stderr)
+	}
 }

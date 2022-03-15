@@ -10,14 +10,14 @@ import (
 	"testing"
 
 	"github.com/jjg/WebE/fzx/inode"
-	"github.com/jjg/WebE/fzx/quiet"
+	"github.com/jjg/WebE/fzx/utils"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestReadMethods(t *testing.T) {
 
 	// Mute output while running tests.
-	defer quiet.BeQuiet()()
+	defer utils.BeQuiet()()
 
 	cases := []struct {
 		method string
@@ -46,7 +46,7 @@ func TestReadMethods(t *testing.T) {
 func TestPostPut(t *testing.T) {
 
 	// Mute output while running tests.
-	defer quiet.BeQuiet()()
+	defer utils.BeQuiet()()
 
 	testFileUrl := "http://localhost:7302/testing/posttest.txt"
 	testFileFzxPath := ".localhost:7302/testing/posttest.txt"
