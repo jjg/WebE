@@ -13,7 +13,7 @@ type Inode struct {
 	FzxPath          string
 	Fingerprint      string
 	StorageLocation  string
-	Created          time.Time
+	Created          time.Time // TODO: This should probably get split into created/updatd
 	Version          int
 	Private          bool
 	Encrypted        bool
@@ -31,6 +31,7 @@ func (i *Inode) Save() error {
 	var err error
 	var inodeJson []byte
 
+	i.Created = time.Now()
 	i.Fingerprint = utils.StringToSha1(i.FzxPath)
 
 	// Write the contents of this inode to storage.

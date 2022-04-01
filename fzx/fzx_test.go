@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/jjg/WebE/fzx/inode"
 	"github.com/stretchr/testify/assert"
@@ -47,8 +48,9 @@ func TestPostPut(t *testing.T) {
 	// Mute output while running tests.
 	//defer utils.BeQuiet()()
 
-	testFileUrl := "http://localhost:7302/testing/posttest.txt"
-	testFileFzxPath := ".localhost:7302/testing/posttest.txt"
+	testFilename := fmt.Sprintf("%v.txt", time.Now().Unix())
+	testFileUrl := fmt.Sprintf("http://localhost:7302/testing/%v", testFilename)
+	testFileFzxPath := fmt.Sprintf(".localhost:7302/testing/%v", testFilename)
 	testFileContents := "A plain text file to test the POST and PUT methods."
 
 	// Write testFileContents to a file.

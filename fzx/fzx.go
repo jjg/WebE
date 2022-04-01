@@ -83,7 +83,7 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 			// DEBUG
 			log.Printf("blockData: >%v<", string(blockData[:]))
 
-			// TODO: Write block to response.
+			// Write block to response.
 			w.Write(blockData)
 		}
 
@@ -94,6 +94,10 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 		log.Print("Got POST")
 
 		// TODO: Check authorization.
+
+		// TODO: POST should not be allowed if an inode exists,
+		// so if we loaded an inode above, reject this request
+		// and maybe recommend PUT instead?
 
 		// Write blocks.
 		log.Print("Begin processing uploaded data.")
