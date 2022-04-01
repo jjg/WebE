@@ -377,3 +377,11 @@ Stuff to figure out:
 
 * https://www.large.net/news/8au43pv.html
 * https://www.adafruit.com/product/1549
+
+
+## 04012022
+
+I should have been updating this for awhile now, but didn't.
+
+I've been focusing on re-writing [jsfs](https://github.com/jjg/jsfs) in [Go](https://go.dev/) under the name [fzx](./fzx).  This is progressing steadily and with any luck I'll have a basic read/write filesystem working soon.
+

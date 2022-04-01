@@ -1,8 +1,6 @@
 package main
 
 import (
-	"bufio"
-	"bytes"
 	"fmt"
 	"io"
 	"log"
@@ -80,36 +78,88 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 		var blockSize int64
 		blockSize = 8
 
-		// Generate a hash of the block data to use as a block filename.
-		// TODO: There's got to be a better way to init this than using an empty string...
-		blockDataToHash := bytes.NewBufferString("")
-		if _, err := io.CopyN(blockDataToHash, req.Body, blockSize); err != nil {
-			log.Fatal(err)
-		}
+		// Step 1 - Get a block of data from req.body as a byte array
+		log.Printf("Get a block of data from the request body")
+		blockData := make([]byte, blockSize)
+		bodyBytesRead, err := req.Body.Read(blockData)
 
 		// DEBUG
-		log.Print(blockDataToHash)
+		log.Printf("bodyBytesRead: %v", bodyBytesRead)
+		log.Printf("err: %v", err)
+		log.Printf("blockData: >%v<", string(blockData[:]))
 
-		// Open block file.
-		blockF, err := os.Create("blockhash.blk")
-		if err != nil {
-			log.Fatal(err)
-		}
+		// Step 2 - Hash the block to get the block name as a string
+		log.Printf("Hash block to get block name")
+		blockHash := utils.BytesToSha1(blockData)
 
-		blockW := bufio.NewWriter(blockF)
-		defer blockF.Close()
+		// DEBUG
+		log.Printf("blockHash: %v", blockHash)
 
-		log.Print("Block file created.")
+		// Step 3 - Write the block data to a file named for the block's hash
+		log.Printf("Write block data to file")
+		blockFile, err := os.Create(fmt.Sprintf("%v/%v", STORAGE_LOCATION, blockHash))
+		defer blockFile.Close()
 
-		// Read one block worth of bytes out of req.Body into block file
-		//if blockBytesWritten, err := io.CopyN(blockW, req.Body, blockSize); err != nil {
-		if blockBytesWritten, err := io.CopyN(blockW, blockDataToHash, blockSize); err != nil {
-			log.Fatal(err)
-		} else {
-			log.Printf("%v bytes written to blockfile", blockBytesWritten)
-		}
+		// DEBUG
+		log.Printf("err: %v", err)
 
-		// TODO: Keep reading & writing blocks until EOF.
+		blockBytesWritten, err := blockFile.Write(blockData)
+
+		// DEBUG
+		log.Printf("blockBytesWritten: %v", blockBytesWritten)
+		log.Printf("err: %v", err)
+
+		// Step 4 - Add the block name (hash) to the inode as a string
+		log.Printf("Add block to inode")
+		anInode.Blocks = append(anInode.Blocks, blockHash)
+
+		/*
+				// Generate a hash of the block data to use as a block filename.
+				// TODO: There's got to be a better way to init this than using an empty string...
+				// NOTE: blockData is only used to initialize blockDataBuffer afaik.
+				var blockData []byte //:= bytes.NewBufferString("")
+				blockDataBuffer := bytes.NewBuffer(blockData)
+
+				// TODO: Make sure we properly handle the last/partial block.
+				//if _, err := io.CopyN(blockData, req.Body, blockSize); err != nil {
+				if _, err := io.CopyN(blockDataBuffer, req.Body, blockSize); err != nil {
+					log.Fatal(err)
+				}
+
+				// DEBUG
+				log.Print("blockDataBuffer: (contents of block) ", blockDataBuffer)
+
+				// Generate a hash of the incoming block data.
+				blockHash := utils.BytesToSha1(blockDataBuffer)
+
+				// DEBUG
+				log.Print("blockHash (block filename): ", blockHash)
+
+					// Open block file.
+					blockF, err := os.Create(blockHash)
+					if err != nil {
+						log.Fatal(err)
+					}
+
+						blockW := bufio.NewWriter(blockF)
+						defer blockF.Close()
+
+						// Write block data into block file.
+						// TODO: Since we carve-up the data into blocks above,
+						// this can probably use io.Copy() instead.
+						if blockBytesWritten, err := io.CopyN(blockW, blockData, blockSize); err != nil {
+							log.Fatal(err)
+						} else {
+							log.Printf("%v bytes written to blockfile %v", blockBytesWritten, blockHash)
+						}
+
+						log.Printf("Block file %v created.", blockHash)
+
+			// Add block hash to inode block array.
+			anInode.Blocks = append(anInode.Blocks, blockHash)
+
+			// TODO: Keep reading & writing blocks until EOF.
+		*/
 
 		// Write inode.
 		if err := anInode.Save(); err != nil {

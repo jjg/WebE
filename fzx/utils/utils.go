@@ -17,6 +17,15 @@ func StringToSha1(in string) string {
 	return fmt.Sprintf("%x", bs)
 }
 
+// TODO: This could probably be combined with
+// StringToSha1 into something more generic.
+func BytesToSha1(in []byte) string {
+	h := sha1.New()
+	h.Write(in)
+	bs := h.Sum(nil)
+	return fmt.Sprintf("%x", bs)
+}
+
 func Reverse(input []string) {
 	for i, j := 0, len(input)-1; i < j; i, j = i+1, j-1 {
 		input[i], input[j] = input[j], input[i]
