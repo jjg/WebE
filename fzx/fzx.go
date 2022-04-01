@@ -17,7 +17,12 @@ const (
 	STORAGE_LOCATION = "./blocks"
 )
 
+var blockSize int64
+
 func Handler(w http.ResponseWriter, req *http.Request) {
+
+	// TODO: Move this to flags, env, etc.
+	blockSize = 8
 
 	var err error
 	var fzxPath string
@@ -38,6 +43,7 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 	}
 
 	switch req.Method {
+
 	case "HEAD":
 		log.Print("Got HEAD")
 		// TODO: Check to see if inode was actually loaded.
@@ -51,6 +57,7 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 
 		// Return result.
 		w.WriteHeader(http.StatusOK)
+
 	case "GET":
 		log.Print("Got GET")
 		// TODO: Check to see if inode was actually loaded.
@@ -61,6 +68,7 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 		// TODO: Set additional headers.
 
 		// TODO: Locate blocks.
+
 		// TODO: Return blocks.
 
 		// Return result.
@@ -73,52 +81,61 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 
 		// Write blocks.
 		log.Print("Begin processing uploaded data.")
-
-		// TODO: Move this to flags, config, etc.
-		var blockSize int64
-		blockSize = 8
-
-		// Step 1 - Get a block of data from req.body as a byte array.
-		// TODO: Repeat this for all the data in req.Body.
-		log.Printf("Get a block of data from the request body.")
 		blockData := make([]byte, blockSize)
-		bodyBytesRead, err := req.Body.Read(blockData)
 
-		// TODO: Handle errors.
+		// Read data from request and store it as blocks.
+		for {
 
-		// DEBUG
-		log.Printf("bodyBytesRead: %v", bodyBytesRead)
-		log.Printf("err: %v", err)
-		log.Printf("blockData: >%v<", string(blockData[:]))
+			// Step 1 - Get a block of data from req.Body as a byte array.
+			log.Printf("Get a block of data from the request body.")
+			bodyBytesRead, err := req.Body.Read(blockData)
 
-		// Step 2 - Hash the block to get the block name as a string.
-		log.Printf("Hash block to get block name.")
-		blockHash := utils.BytesToSha1(blockData)
+			// DEBUG
+			log.Printf("bodyBytesRead: %v", bodyBytesRead)
+			log.Printf("err: %v", err)
+			log.Printf("blockData: >%v<", string(blockData[:]))
 
-		// DEBUG
-		log.Printf("blockHash: %v", blockHash)
+			// If there's no more data to read, eject.
+			// TODO: There may be a more elegant way to detect EOF,
+			// if you know of one, replace this with that.
+			if err != nil {
+				if bodyBytesRead == 0 {
+					break
+				} else {
+					panic(err)
+				}
+			}
 
-		// Step 3 - Write the block data to a file named for the block's hash.
-		log.Printf("Write block data to file.")
-		blockFile, err := os.Create(fmt.Sprintf("%v/%v", STORAGE_LOCATION, blockHash))
-		defer blockFile.Close()
+			// Step 2 - Hash the block to get the block name as a string.
+			log.Printf("Hash block to get block name.")
+			blockHash := utils.BytesToSha1(blockData)
 
-		// TODO: Handle errors.
+			// DEBUG
+			log.Printf("blockHash: %v", blockHash)
 
-		// DEBUG
-		log.Printf("err: %v", err)
+			// Step 3 - Write the block data to a file named for the block's hash.
+			log.Printf("Write block data to file.")
+			blockFile, err := os.Create(fmt.Sprintf("%v/%v", STORAGE_LOCATION, blockHash))
+			if err != nil {
+				panic(err)
+			}
+			defer blockFile.Close()
 
-		blockBytesWritten, err := blockFile.Write(blockData)
+			// DEBUG
+			log.Printf("err: %v", err)
 
-		// DEBUG
-		log.Printf("blockBytesWritten: %v", blockBytesWritten)
-		log.Printf("err: %v", err)
+			blockBytesWritten, err := blockFile.Write(blockData)
 
-		// Step 4 - Add the block name (hash) to the inode as a string.
-		log.Printf("Add block to inode.")
-		anInode.Blocks = append(anInode.Blocks, blockHash)
+			// DEBUG
+			log.Printf("blockBytesWritten: %v", blockBytesWritten)
+			log.Printf("err: %v", err)
 
-		// Write inode.
+			// Step 4 - Add the block name (hash) to the inode as a string.
+			log.Printf("Add block to inode.")
+			anInode.Blocks = append(anInode.Blocks, blockHash)
+		}
+
+		// Write the inode.
 		if err := anInode.Save(); err != nil {
 			log.Print(err)
 		}
