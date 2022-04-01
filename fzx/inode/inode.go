@@ -24,6 +24,8 @@ type Inode struct {
 	BlocksReplicated int
 	InodeReplicated  int
 	Blocks           []string
+	// New fzx properties
+	Status int
 }
 
 func (i *Inode) Save() error {
@@ -55,12 +57,16 @@ func (i *Inode) Load(storageLocation string, fzxPath string) error {
 
 	inodeFilename := fmt.Sprintf("%v/%v.json", i.StorageLocation, i.Fingerprint)
 	if inodeJson, err = ioutil.ReadFile(inodeFilename); err != nil {
+		// TODO: Inspect err to set Status more accurately.
+		i.Status = 404
 		return err
 	}
 
 	if err = json.Unmarshal([]byte(inodeJson), i); err != nil {
 		return err
 	}
+
+	i.Status = 200
 
 	return err
 }

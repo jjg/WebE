@@ -389,5 +389,5 @@ Writing a block works as does writing out the updated inode.  The next step is t
 
 OK, now POST is writing all blocks and GET is reading them!
 
-
+Weird problem when testing manually with `curl`.  GET request can return a 404 as expected but the same URL using a `HEAD` request hangs open?
 

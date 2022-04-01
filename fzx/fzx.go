@@ -23,7 +23,7 @@ var blockSize int64
 func Handler(w http.ResponseWriter, req *http.Request) {
 
 	// TODO: Move this to flags, env, etc.
-	blockSize = 8
+	blockSize = 1024 * 1024 // 1MB  //8
 
 	var err error
 	var fzxPath string
@@ -38,16 +38,32 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 	}
 
 	// Try to load inode (it's OK if this fails for POST/PUT/etc.).
+	// TODO: I'm not sure anInode is getting reinitialized as expected during
+	// each request cycle.  Tests seem to show that values "stick" between
+	// requests and I'm not sure if this is just a side-effect of the test
+	// harness or a problem with the way I'm handling pointers.  Something
+	// to look into.
 	anInode := &inode.Inode{FzxPath: fzxPath, StorageLocation: STORAGE_LOCATION}
 	if err := anInode.Load(STORAGE_LOCATION, fzxPath); err != nil {
 		log.Printf("Error loading inode for %v, %v", fzxPath, err)
+	} else {
+		log.Printf("Loaded inode for %v", fzxPath)
 	}
+
+	// DEBUG
+	log.Print(anInode)
 
 	switch req.Method {
 
 	case "HEAD":
 		log.Print("Got HEAD")
-		// TODO: Check to see if inode was actually loaded.
+
+		// Check to see if inode was actually loaded.
+		if anInode.Status == 404 {
+			w.WriteHeader(http.StatusNotFound)
+			break
+		}
+
 		// TODO: Check authorization.
 
 		// Set headers using inode data.
@@ -61,7 +77,13 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 
 	case "GET":
 		log.Print("Got GET")
-		// TODO: Check to see if inode was actually loaded.
+
+		// Check to see if inode was actually loaded.
+		if anInode.Status == 404 {
+			w.WriteHeader(http.StatusNotFound)
+			break
+		}
+
 		// TODO: Check authorization.
 
 		// Set headers using inode data.
@@ -81,7 +103,7 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 			}
 
 			// DEBUG
-			log.Printf("blockData: >%v<", string(blockData[:]))
+			//log.Printf("blockData: >%v<", string(blockData[:]))
 
 			// Write block to response.
 			w.Write(blockData)
@@ -93,11 +115,17 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 	case "POST":
 		log.Print("Got POST")
 
-		// TODO: Check authorization.
-
-		// TODO: POST should not be allowed if an inode exists,
+		// Check to see if inode was actually loaded.
+		// POST should not be allowed if an inode exists,
 		// so if we loaded an inode above, reject this request
 		// and maybe recommend PUT instead?
+		if anInode.Status != 404 {
+			w.Write([]byte("Can't POST over an existing file, try PUT instead."))
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			break
+		}
+
+		// TODO: Check authorization.
 
 		// Write blocks.
 		log.Print("Begin processing uploaded data.")
@@ -113,7 +141,7 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 			// DEBUG
 			log.Printf("bodyBytesRead: %v", bodyBytesRead)
 			log.Printf("err: %v", err)
-			log.Printf("blockData: >%v<", string(blockData[:]))
+			//log.Printf("blockData: >%v<", string(blockData[:]))
 
 			// If there's no more data to read, eject.
 			// TODO: See if there is a better way to detect EOF.
@@ -168,20 +196,45 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 			w.WriteHeader(http.StatusCreated)
 			io.WriteString(w, s)
 		}
+
 	case "PUT":
 		log.Print("Got PUT")
-		// NOTE: This is probably identical to POST.
+		// Check to see if inode was actually loaded.
+		if anInode.Status == 404 {
+			w.WriteHeader(http.StatusNotFound)
+			break
+		}
+
+		// TODO: Check authorization.
+		// TODO: If authorized, proceed akin to POST.
+
 	case "DELETE":
 		log.Print("Got DELETE")
+
+		// Check to see if inode was actually loaded.
+		if anInode.Status == 404 {
+			w.WriteHeader(http.StatusNotFound)
+			break
+		}
+
 		// TODO: Check authorization.
 		// TODO: Delete inode.
 		// TODO: Return result.
+
 	case "EXECUTE":
 		log.Print("Got EXECUTE")
+
+		// Check to see if inode was actually loaded.
+		if anInode.Status == 404 {
+			w.WriteHeader(http.StatusNotFound)
+			break
+		}
+
 		// TODO: Check authorization.
 		// TODO: Handle EXECUTE request.
 		// TODO: Execute specified binary.
 		// TODO: Return output.
+
 	default:
 		log.Printf("I don't know what to do with method %v", req.Method)
 		w.WriteHeader(http.StatusNotImplemented)

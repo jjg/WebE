@@ -18,8 +18,10 @@ import (
 func TestReadMethods(t *testing.T) {
 
 	// Mute output while running tests.
-	//defer utils.BeQuiet()()
+	defer utils.BeQuiet()()
 
+	// TODO: These tests need to be re-worked to create the resources
+	// they try to read (now that we're actually loading inodes).
 	cases := []struct {
 		method string
 		url    string
