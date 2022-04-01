@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -70,6 +71,21 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 		// TODO: Locate blocks.
 
 		// TODO: Return blocks.
+		for _, blockName := range anInode.Blocks {
+			var err error
+			var blockData []byte
+
+			// Read block from disk.
+			if blockData, err = ioutil.ReadFile(fmt.Sprintf("%v/%v", STORAGE_LOCATION, blockName)); err != nil {
+				panic(err)
+			}
+
+			// DEBUG
+			log.Printf("blockData: >%v<", string(blockData[:]))
+
+			// TODO: Write block to response.
+			w.Write(blockData)
+		}
 
 		// Return result.
 		w.WriteHeader(http.StatusOK)
@@ -96,8 +112,7 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 			log.Printf("blockData: >%v<", string(blockData[:]))
 
 			// If there's no more data to read, eject.
-			// TODO: There may be a more elegant way to detect EOF,
-			// if you know of one, replace this with that.
+			// TODO: See if there is a better way to detect EOF.
 			if err != nil {
 				if bodyBytesRead == 0 {
 					break
@@ -124,7 +139,7 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 			// DEBUG
 			log.Printf("err: %v", err)
 
-			blockBytesWritten, err := blockFile.Write(blockData)
+			blockBytesWritten, err := blockFile.Write(blockData[0:bodyBytesRead])
 
 			// DEBUG
 			log.Printf("blockBytesWritten: %v", blockBytesWritten)
