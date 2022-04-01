@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/jjg/WebE/fzx/inode"
+	"github.com/jjg/WebE/fzx/utils"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -46,7 +47,7 @@ func TestReadMethods(t *testing.T) {
 func TestPostPut(t *testing.T) {
 
 	// Mute output while running tests.
-	//defer utils.BeQuiet()()
+	defer utils.BeQuiet()()
 
 	testFilename := fmt.Sprintf("%v.txt", time.Now().Unix())
 	testFileUrl := fmt.Sprintf("http://localhost:7302/testing/%v", testFilename)

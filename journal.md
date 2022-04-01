@@ -387,3 +387,7 @@ I've been focusing on re-writing [jsfs](https://github.com/jjg/jsfs) in [Go](htt
 
 Writing a block works as does writing out the updated inode.  The next step is to repeat the process to write blocks for the entire body, and then we should be able to move-on to reading it all back for a GET request.
 
+OK, now POST is writing all blocks and GET is reading them!
+
+
+
