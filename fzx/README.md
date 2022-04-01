@@ -12,8 +12,8 @@ I'm not going to put much here for now. [The journal](../journal.md) is the best
 
 ### Run it!
 
-`go build`
-`./fzx`
+1. `go build`
+2. `./fzx`
 
 ### API
 
