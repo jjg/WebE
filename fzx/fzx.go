@@ -78,27 +78,32 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 		var blockSize int64
 		blockSize = 8
 
-		// Step 1 - Get a block of data from req.body as a byte array
-		log.Printf("Get a block of data from the request body")
+		// Step 1 - Get a block of data from req.body as a byte array.
+		// TODO: Repeat this for all the data in req.Body.
+		log.Printf("Get a block of data from the request body.")
 		blockData := make([]byte, blockSize)
 		bodyBytesRead, err := req.Body.Read(blockData)
+
+		// TODO: Handle errors.
 
 		// DEBUG
 		log.Printf("bodyBytesRead: %v", bodyBytesRead)
 		log.Printf("err: %v", err)
 		log.Printf("blockData: >%v<", string(blockData[:]))
 
-		// Step 2 - Hash the block to get the block name as a string
-		log.Printf("Hash block to get block name")
+		// Step 2 - Hash the block to get the block name as a string.
+		log.Printf("Hash block to get block name.")
 		blockHash := utils.BytesToSha1(blockData)
 
 		// DEBUG
 		log.Printf("blockHash: %v", blockHash)
 
-		// Step 3 - Write the block data to a file named for the block's hash
-		log.Printf("Write block data to file")
+		// Step 3 - Write the block data to a file named for the block's hash.
+		log.Printf("Write block data to file.")
 		blockFile, err := os.Create(fmt.Sprintf("%v/%v", STORAGE_LOCATION, blockHash))
 		defer blockFile.Close()
+
+		// TODO: Handle errors.
 
 		// DEBUG
 		log.Printf("err: %v", err)
@@ -109,57 +114,9 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 		log.Printf("blockBytesWritten: %v", blockBytesWritten)
 		log.Printf("err: %v", err)
 
-		// Step 4 - Add the block name (hash) to the inode as a string
-		log.Printf("Add block to inode")
+		// Step 4 - Add the block name (hash) to the inode as a string.
+		log.Printf("Add block to inode.")
 		anInode.Blocks = append(anInode.Blocks, blockHash)
-
-		/*
-				// Generate a hash of the block data to use as a block filename.
-				// TODO: There's got to be a better way to init this than using an empty string...
-				// NOTE: blockData is only used to initialize blockDataBuffer afaik.
-				var blockData []byte //:= bytes.NewBufferString("")
-				blockDataBuffer := bytes.NewBuffer(blockData)
-
-				// TODO: Make sure we properly handle the last/partial block.
-				//if _, err := io.CopyN(blockData, req.Body, blockSize); err != nil {
-				if _, err := io.CopyN(blockDataBuffer, req.Body, blockSize); err != nil {
-					log.Fatal(err)
-				}
-
-				// DEBUG
-				log.Print("blockDataBuffer: (contents of block) ", blockDataBuffer)
-
-				// Generate a hash of the incoming block data.
-				blockHash := utils.BytesToSha1(blockDataBuffer)
-
-				// DEBUG
-				log.Print("blockHash (block filename): ", blockHash)
-
-					// Open block file.
-					blockF, err := os.Create(blockHash)
-					if err != nil {
-						log.Fatal(err)
-					}
-
-						blockW := bufio.NewWriter(blockF)
-						defer blockF.Close()
-
-						// Write block data into block file.
-						// TODO: Since we carve-up the data into blocks above,
-						// this can probably use io.Copy() instead.
-						if blockBytesWritten, err := io.CopyN(blockW, blockData, blockSize); err != nil {
-							log.Fatal(err)
-						} else {
-							log.Printf("%v bytes written to blockfile %v", blockBytesWritten, blockHash)
-						}
-
-						log.Printf("Block file %v created.", blockHash)
-
-			// Add block hash to inode block array.
-			anInode.Blocks = append(anInode.Blocks, blockHash)
-
-			// TODO: Keep reading & writing blocks until EOF.
-		*/
 
 		// Write inode.
 		if err := anInode.Save(); err != nil {

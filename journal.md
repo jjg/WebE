@@ -385,3 +385,5 @@ I should have been updating this for awhile now, but didn't.
 
 I've been focusing on re-writing [jsfs](https://github.com/jjg/jsfs) in [Go](https://go.dev/) under the name [fzx](./fzx).  This is progressing steadily and with any luck I'll have a basic read/write filesystem working soon.
 
+Writing a block works as does writing out the updated inode.  The next step is to repeat the process to write blocks for the entire body, and then we should be able to move-on to reading it all back for a GET request.
+
