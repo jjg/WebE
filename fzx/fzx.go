@@ -48,6 +48,11 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 		log.Printf("Error loading inode for %v, %v", fzxPath, err)
 	} else {
 		log.Printf("Loaded inode for %v", fzxPath)
+
+		// Set headers using inode data.
+		w.Header().Add("Content-Type", anInode.ContentType)
+		w.Header().Add("Content-Length", fmt.Sprintf("%v", anInode.FileSize))
+		w.Header().Add("FzxPath", anInode.FzxPath)
 	}
 
 	// DEBUG
@@ -64,17 +69,11 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 
 			// NOTE: I don't know why this is needed, but if we don't
 			// write something, the connection hangs open.
-			w.Write([]bytes("Not found"))
+			w.Write([]byte("Not found"))
 			break
 		}
 
 		// TODO: Check authorization.
-
-		// Set headers using inode data.
-		w.Header().Add("Content-Type", anInode.ContentType)
-		// TODO: Determine if FileSize is really equivalent here, and if so consider renaming it.
-		w.Header().Add("Content-Length", fmt.Sprintf("%v", anInode.FileSize))
-		// TODO: Set additional headers?
 
 		// Return result.
 		w.WriteHeader(http.StatusOK)
@@ -90,11 +89,6 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 
 		// TODO: Check authorization.
 
-		// Set headers using inode data.
-		w.Header().Add("FzxPath", anInode.FzxPath)
-
-		// TODO: Set additional headers.
-
 		// TODO: Locate blocks.
 
 		// Return blocks.
@@ -106,9 +100,6 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 			if blockData, err = ioutil.ReadFile(fmt.Sprintf("%v/%v", STORAGE_LOCATION, blockName)); err != nil {
 				panic(err)
 			}
-
-			// DEBUG
-			//log.Printf("blockData: >%v<", string(blockData[:]))
 
 			// Write block to response.
 			w.Write(blockData)
@@ -129,11 +120,18 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 
 		// TODO: Check authorization.
 
+		// Set inode metadata
+		v, ok := req.Header["Content-Type"]
+		if ok {
+			anInode.ContentType = v[0]
+		}
+
 		// Write blocks.
 		log.Print("Begin processing uploaded data.")
 		blockData := make([]byte, blockSize)
 
 		// Read data from request and store it as blocks.
+		totalBlockBytesWritten := 0
 		for {
 
 			// Step 1 - Get a block of data from req.Body as a byte array.
@@ -142,8 +140,6 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 
 			// DEBUG
 			log.Printf("bodyBytesRead: %v", bodyBytesRead)
-			log.Printf("err: %v", err)
-			//log.Printf("blockData: >%v<", string(blockData[:]))
 
 			// If there's no more data to read, eject.
 			// TODO: See if there is a better way to detect EOF.
@@ -166,19 +162,20 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 			}
 			defer blockFile.Close()
 
-			// DEBUG
-			log.Printf("err: %v", err)
-
 			blockBytesWritten, err := blockFile.Write(blockData[0:bodyBytesRead])
+			totalBlockBytesWritten += blockBytesWritten
 
 			// DEBUG
 			log.Printf("blockBytesWritten: %v", blockBytesWritten)
-			log.Printf("err: %v", err)
+			log.Printf("totalBlockBytesWritten: %v", totalBlockBytesWritten)
 
 			// Step 4 - Add the block name (hash) to the inode as a string.
 			log.Printf("Add block to inode.")
 			anInode.Blocks = append(anInode.Blocks, blockHash)
 		}
+
+		// Update inode metadata
+		anInode.FileSize = totalBlockBytesWritten
 
 		// Write the inode.
 		if err := anInode.Save(); err != nil {

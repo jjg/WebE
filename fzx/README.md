@@ -6,7 +6,7 @@ I'm not going to put much here for now. [The journal](../journal.md) is the best
 
 ## Usage
 
-### Tests
+### Automated Tests
 
 `go test ./...`
 
@@ -15,10 +15,15 @@ I'm not going to put much here for now. [The journal](../journal.md) is the best
 1. `go build`
 2. `./fzx`
 
-### API
+## API
 
 The API is based off [jsfs](https://github.com/jjg/jsfs#api).  It is nowhere near complete (again, see [the journal](../journal.md) for current status).
 
+### Basic examples
+
+* Upload a file: `curl -v --data-binary @fzx "http://localhost:7302/testing/fzx"`
+* Get file info: `curl -v -I "http://localhost:7302/testing/fzx"`
+* Download a file: `curl -v -o fzx3 "http://localhost:7302/testing/fzx"`
 
 ## TODO
 
