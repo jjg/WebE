@@ -61,6 +61,10 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 		// Check to see if inode was actually loaded.
 		if anInode.Status == 404 {
 			w.WriteHeader(http.StatusNotFound)
+
+			// NOTE: I don't know why this is needed, but if we don't
+			// write something, the connection hangs open.
+			w.Write([]bytes("Not found"))
 			break
 		}
 
@@ -88,11 +92,12 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 
 		// Set headers using inode data.
 		w.Header().Add("FzxPath", anInode.FzxPath)
+
 		// TODO: Set additional headers.
 
 		// TODO: Locate blocks.
 
-		// TODO: Return blocks.
+		// Return blocks.
 		for _, blockName := range anInode.Blocks {
 			var err error
 			var blockData []byte
@@ -108,9 +113,6 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 			// Write block to response.
 			w.Write(blockData)
 		}
-
-		// Return result.
-		w.WriteHeader(http.StatusOK)
 
 	case "POST":
 		log.Print("Got POST")
@@ -145,12 +147,8 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 
 			// If there's no more data to read, eject.
 			// TODO: See if there is a better way to detect EOF.
-			if err != nil {
-				if bodyBytesRead == 0 {
-					break
-				} else {
-					panic(err)
-				}
+			if bodyBytesRead == 0 {
+				break
 			}
 
 			// Step 2 - Hash the block to get the block name as a string.
