@@ -391,3 +391,13 @@ OK, now POST is writing all blocks and GET is reading them!
 
 Weird problem when testing manually with `curl`.  GET request can return a 404 as expected but the same URL using a `HEAD` request hangs open?
 
+
+## 04022022
+
+Made a lot of progress today.  Files can be stored and retrieved and `HEAD` requests work as well!  There's no authorization yet, and there's still plenty of metadata to wrangle but the basics are there.
+
+THere are a few automated tests failing at the moment (they were written when almost all the responses were faked), and of course there's many opportunities for optimization, but I think this is a good point to pause for a bit and reflect on exactly what I want to do next.
+
+It's also at a point where I could install it using Gokrazy and have a somewhat usable device.  I might try that next just for the fun and distraction.
+
+
