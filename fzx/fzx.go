@@ -15,7 +15,7 @@ import (
 // TODO: Move these to flags, env, etc.
 const (
 	LISTEN_PORT      = ":7302"
-	STORAGE_LOCATION = "./blocks"
+	STORAGE_LOCATION = "/perm"
 )
 
 var blockSize int64

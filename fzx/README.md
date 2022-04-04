@@ -15,6 +15,14 @@ I'm not going to put much here for now. [The journal](../journal.md) is the best
 1. `go build`
 2. `./fzx`
 
+### Gokrazy
+
+> Incomplete, currently just notes to myself.
+
+`go get github.com/jjg/WebE/fzx`
+`gokr-packer -overwrite=/dev/mmcblk0 -serial_console=disabled github.com/gokrazy/mkfs github.com/jjg/WebE/fzx`
+
+
 ## API
 
 The API is based off [jsfs](https://github.com/jjg/jsfs#api).  It is nowhere near complete (again, see [the journal](../journal.md) for current status).
