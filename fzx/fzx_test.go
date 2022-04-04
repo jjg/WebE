@@ -49,7 +49,7 @@ func TestReadMethods(t *testing.T) {
 func TestPostPut(t *testing.T) {
 
 	// Mute output while running tests.
-	defer utils.BeQuiet()()
+	//defer utils.BeQuiet()()
 
 	testFilename := fmt.Sprintf("%v.txt", time.Now().Unix())
 	testFileUrl := fmt.Sprintf("http://localhost:7302/testing/%v", testFilename)
@@ -77,6 +77,7 @@ func TestPostPut(t *testing.T) {
 
 	// POST the file.
 	req := httptest.NewRequest(http.MethodPost, testFileUrl, f2)
+	req.Header.Set("Content-Type", "Text/Plain")
 	postRecorder := httptest.NewRecorder()
 
 	Handler(postRecorder, req)

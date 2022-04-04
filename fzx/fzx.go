@@ -14,12 +14,12 @@ import (
 )
 
 const (
-	DEFAULT_LISTEN_PORT      = ":7302"
+	DEFAULT_LISTEN_PORT      = 7302
 	DEFAULT_STORAGE_LOCATION = "blocks"
 	DEFAULT_BLOCK_SIZE       = 1024 * 1024
 )
 
-// Globals
+var listenPort int
 var storageLocation string
 var blockSize int64
 
@@ -177,6 +177,9 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 		// Update inode metadata
 		anInode.FileSize = totalBlockBytesWritten
 
+		// DEBUG
+		log.Print(anInode)
+
 		// Write the inode.
 		if err := anInode.Save(); err != nil {
 			log.Print(err)
@@ -239,9 +242,10 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 func main() {
 
 	// Get port, data directory from command line.
-	var listenPort = flag.String("p", DEFAULT_LISTEN_PORT, "Override the default port (7302)")
-	blockSize = flag.Int64("bs", DEFAULT_BLOCK_SIZE, "Block size in bytes")
-	storageLocation = flag.String("storage", DEFAULT_STORAGE_LOCATION, "Block storage location")
+	flag.IntVar(&listenPort, "p", DEFAULT_LISTEN_PORT, "Override the default port")
+	flag.Int64Var(&blockSize, "bs", DEFAULT_BLOCK_SIZE, "Block size in bytes")
+	flag.StringVar(&storageLocation, "storage", DEFAULT_STORAGE_LOCATION, "Block storage location")
+	flag.Parse()
 
 	log.Printf("fzx listening on port %v", listenPort)
 
@@ -250,5 +254,5 @@ func main() {
 
 	// Listen for incoming HTTP requests.
 	// NOTE: This blocks anything below it from running.
-	log.Fatal(http.ListenAndServe(listenPort, nil))
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", listenPort), nil))
 }
