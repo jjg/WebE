@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -12,18 +13,17 @@ import (
 	"github.com/jjg/WebE/fzx/utils"
 )
 
-// TODO: Move these to flags, env, etc.
 const (
-	LISTEN_PORT      = ":7302"
-	STORAGE_LOCATION = "/perm"
+	DEFAULT_LISTEN_PORT      = ":7302"
+	DEFAULT_STORAGE_LOCATION = "blocks"
+	DEFAULT_BLOCK_SIZE       = 1024 * 1024
 )
 
+// Globals
+var storageLocation string
 var blockSize int64
 
 func Handler(w http.ResponseWriter, req *http.Request) {
-
-	// TODO: Move this to flags, env, etc.
-	blockSize = 1024 * 1024 // 1MB  //8
 
 	var err error
 	var fzxPath string
@@ -43,8 +43,8 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 	// requests and I'm not sure if this is just a side-effect of the test
 	// harness or a problem with the way I'm handling pointers.  Something
 	// to look into.
-	anInode := &inode.Inode{FzxPath: fzxPath, StorageLocation: STORAGE_LOCATION}
-	if err := anInode.Load(STORAGE_LOCATION, fzxPath); err != nil {
+	anInode := &inode.Inode{FzxPath: fzxPath, StorageLocation: storageLocation}
+	if err := anInode.Load(storageLocation, fzxPath); err != nil {
 		log.Printf("Error loading inode for %v, %v", fzxPath, err)
 	} else {
 		log.Printf("Loaded inode for %v", fzxPath)
@@ -97,7 +97,7 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 			var blockData []byte
 
 			// Read block from disk.
-			if blockData, err = ioutil.ReadFile(fmt.Sprintf("%v/%v", STORAGE_LOCATION, blockName)); err != nil {
+			if blockData, err = ioutil.ReadFile(fmt.Sprintf("%v/%v", storageLocation, blockName)); err != nil {
 				panic(err)
 			}
 
@@ -156,7 +156,7 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 
 			// Step 3 - Write the block data to a file named for the block's hash.
 			log.Printf("Write block data to file.")
-			blockFile, err := os.Create(fmt.Sprintf("%v/%v", STORAGE_LOCATION, blockHash))
+			blockFile, err := os.Create(fmt.Sprintf("%v/%v", storageLocation, blockHash))
 			if err != nil {
 				panic(err)
 			}
@@ -238,12 +238,17 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 
 func main() {
 
-	log.Printf("fzx listening on port %v", LISTEN_PORT)
+	// Get port, data directory from command line.
+	var listenPort = flag.String("p", DEFAULT_LISTEN_PORT, "Override the default port (7302)")
+	blockSize = flag.Int64("bs", DEFAULT_BLOCK_SIZE, "Block size in bytes")
+	storageLocation = flag.String("storage", DEFAULT_STORAGE_LOCATION, "Block storage location")
+
+	log.Printf("fzx listening on port %v", listenPort)
 
 	// Wire-up handler.
 	http.HandleFunc("/", Handler)
 
 	// Listen for incoming HTTP requests.
 	// NOTE: This blocks anything below it from running.
-	log.Fatal(http.ListenAndServe(LISTEN_PORT, nil))
+	log.Fatal(http.ListenAndServe(listenPort, nil))
 }

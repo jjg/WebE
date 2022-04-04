@@ -401,3 +401,9 @@ THere are a few automated tests failing at the moment (they were written when al
 It's also at a point where I could install it using Gokrazy and have a somewhat usable device.  I might try that next just for the fun and distraction.
 
 
+
+## 04042022
+
+Got a chance to try running the latest build of [fzx](./fzx) on [gokrazy](https://gokrazy.org/) and after a bit of fiddling it works.  This is something of a milestone, having a read/write implementation running natively on nearly bare metal.
+
+Lots to do to make it practical but it's an exciting step (especially toward solar-powered nodes) and very invigorating!
