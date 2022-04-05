@@ -12,7 +12,7 @@ import (
 type Inode struct {
 	FzxPath          string
 	Fingerprint      string
-	StorageLocation  string
+	StorageLocation  *string
 	Created          time.Time // TODO: This should probably get split into created/updatd
 	Version          int
 	Private          bool
@@ -38,7 +38,7 @@ func (i *Inode) Save() error {
 
 	// Write the contents of this inode to storage.
 	inodeJson, err = json.Marshal(i)
-	inodeFilename := fmt.Sprintf("%v/%v.json", i.StorageLocation, i.Fingerprint)
+	inodeFilename := fmt.Sprintf("%v/%v.json", *i.StorageLocation, i.Fingerprint)
 
 	// TODO: See if this is the best way to write a file.
 	// TODO: Do some error handling around this write.
@@ -47,7 +47,7 @@ func (i *Inode) Save() error {
 	return err
 }
 
-func (i *Inode) Load(storageLocation string, fzxPath string) error {
+func (i *Inode) Load(storageLocation *string, fzxPath string) error {
 	var err error
 	var inodeJson []byte
 
@@ -55,7 +55,7 @@ func (i *Inode) Load(storageLocation string, fzxPath string) error {
 	i.FzxPath = fzxPath
 	i.Fingerprint = utils.StringToSha1(i.FzxPath)
 
-	inodeFilename := fmt.Sprintf("%v/%v.json", i.StorageLocation, i.Fingerprint)
+	inodeFilename := fmt.Sprintf("%v/%v.json", *i.StorageLocation, i.Fingerprint)
 	if inodeJson, err = ioutil.ReadFile(inodeFilename); err != nil {
 		// TODO: Inspect err to set Status more accurately.
 		i.Status = 404

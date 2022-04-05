@@ -19,9 +19,10 @@ const (
 	DEFAULT_BLOCK_SIZE       = 1024 * 1024
 )
 
-var listenPort int
-var storageLocation string
-var blockSize int64
+// Get port, data directory from command line.
+var listenPort = flag.Int("p", DEFAULT_LISTEN_PORT, "Override the default port")
+var blockSize = flag.Int64("bs", DEFAULT_BLOCK_SIZE, "Block size in bytes")
+var storageLocation = flag.String("storage", DEFAULT_STORAGE_LOCATION, "Block storage location")
 
 func Handler(w http.ResponseWriter, req *http.Request) {
 
@@ -97,7 +98,7 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 			var blockData []byte
 
 			// Read block from disk.
-			if blockData, err = ioutil.ReadFile(fmt.Sprintf("%v/%v", storageLocation, blockName)); err != nil {
+			if blockData, err = ioutil.ReadFile(fmt.Sprintf("%v/%v", *storageLocation, blockName)); err != nil {
 				panic(err)
 			}
 
@@ -128,7 +129,7 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 
 		// Write blocks.
 		log.Print("Begin processing uploaded data.")
-		blockData := make([]byte, blockSize)
+		blockData := make([]byte, *blockSize)
 
 		// Read data from request and store it as blocks.
 		totalBlockBytesWritten := 0
@@ -156,7 +157,7 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 
 			// Step 3 - Write the block data to a file named for the block's hash.
 			log.Printf("Write block data to file.")
-			blockFile, err := os.Create(fmt.Sprintf("%v/%v", storageLocation, blockHash))
+			blockFile, err := os.Create(fmt.Sprintf("%v/%v", *storageLocation, blockHash))
 			if err != nil {
 				panic(err)
 			}
@@ -241,18 +242,14 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 
 func main() {
 
-	// Get port, data directory from command line.
-	flag.IntVar(&listenPort, "p", DEFAULT_LISTEN_PORT, "Override the default port")
-	flag.Int64Var(&blockSize, "bs", DEFAULT_BLOCK_SIZE, "Block size in bytes")
-	flag.StringVar(&storageLocation, "storage", DEFAULT_STORAGE_LOCATION, "Block storage location")
 	flag.Parse()
 
-	log.Printf("fzx listening on port %v", listenPort)
+	log.Printf("fzx listening on port %v", *listenPort)
 
 	// Wire-up handler.
 	http.HandleFunc("/", Handler)
 
 	// Listen for incoming HTTP requests.
 	// NOTE: This blocks anything below it from running.
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", listenPort), nil))
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", *listenPort), nil))
 }

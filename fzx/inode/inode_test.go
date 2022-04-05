@@ -12,7 +12,7 @@ func TestCreateInode(t *testing.T) {
 	storageLocation := "./blocks"
 
 	// Initialize new inode
-	inode := &Inode{FzxPath: fzxPath, StorageLocation: storageLocation}
+	inode := &Inode{FzxPath: fzxPath, StorageLocation: &storageLocation}
 
 	// TODO: Set some values.
 
@@ -23,7 +23,7 @@ func TestCreateInode(t *testing.T) {
 
 	// Load inode
 	loadedInode := &Inode{}
-	if err := loadedInode.Load(storageLocation, fzxPath); err != nil {
+	if err := loadedInode.Load(&storageLocation, fzxPath); err != nil {
 		t.Fatal(err)
 	}
 
