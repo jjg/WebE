@@ -43,7 +43,7 @@ The API is based off [jsfs](https://github.com/jjg/jsfs#api).  It is nowhere nea
 * Implement basic `EXECUTE`
 * Implement complete responses (all headers, etc.)
 * Implement authorization
-* Implement configuration (flags, config file, etc.)
+* ~~Implement configuration (flags, config file, etc.)~~
 * Implement compatibility mode (read/write legacy JSFS storage pools)
 * Implement federation
 * Refactor for performance
