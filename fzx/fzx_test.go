@@ -99,4 +99,5 @@ func TestHttpMethods(t *testing.T) {
 	// TODO: Test PUT.
 	// TODO: Test EXECUTE.
 	// TODO: Test DELETE.
+	// TODO: Test OPTIONS.
 }

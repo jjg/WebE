@@ -60,7 +60,6 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 	log.Print(anInode)
 
 	switch req.Method {
-
 	case "HEAD":
 		log.Print("Got HEAD")
 		methods.Head(w, req, anInode)

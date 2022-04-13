@@ -7,4 +7,7 @@ import (
 )
 
 func Put(w http.ResponseWriter, req *http.Request, anInode *inode.Inode) {
+
+	// TODO: Check authorization.
+	// TODO: Update the file.
 }
