@@ -20,7 +20,7 @@ type Inode struct {
 	AccessKey        string
 	ContentType      string
 	FileSize         int
-	BlockSize        int
+	BlockSize        int64
 	BlocksReplicated int
 	InodeReplicated  int
 	Blocks           []string

@@ -49,4 +49,4 @@ The API is based off [jsfs](https://github.com/jjg/jsfs#api).  It is nowhere nea
 * Refactor for performance
 * Bugs
   + ~~`HEAD` doesn't close the connection when returning 404 for some reason?~~
-  + Fix broken tests
+  + ~~Fix broken tests~~
