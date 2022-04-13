@@ -15,46 +15,18 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestReadMethods(t *testing.T) {
+func TestHttpMethods(t *testing.T) {
 
 	// Mute output while running tests.
 	defer utils.BeQuiet()()
 
-	// TODO: These tests need to be re-worked to create the resources
-	// they try to read (now that we're actually loading inodes).
-	cases := []struct {
-		method string
-		url    string
-	}{
-		{http.MethodHead, "http://example.com"},
-		{http.MethodGet, "http://example.com"},
-		{http.MethodDelete, "http://example.com"},
-		// NOTE: EXECUTE is a made-up method specific to fzx,
-		// maybe we'll create an RFC for it once this takes off...
-		{"EXECUTE", "http://example.com"},
-	}
-
-	for _, c := range cases {
-		req := httptest.NewRequest(c.method, c.url, nil)
-		w := httptest.NewRecorder()
-
-		Handler(w, req)
-
-		if want, got := http.StatusOK, w.Result().StatusCode; want != got {
-			t.Fatalf("expected %v, got %v", want, got)
-		}
-	}
-}
-
-func TestPostPut(t *testing.T) {
-
-	// Mute output while running tests.
-	defer utils.BeQuiet()()
-
+	// Setup test file parameters.
 	testFilename := fmt.Sprintf("%v.txt", time.Now().Unix())
 	testFileUrl := fmt.Sprintf("http://localhost:7302/testing/%v", testFilename)
 	testFileFzxPath := fmt.Sprintf(".localhost:7302/testing/%v", testFilename)
 	testFileContents := "A plain text file to test the POST and PUT methods."
+	testFileContentType := "Text/Plain"
+	testFileLength := len(testFileContents)
 
 	// Write testFileContents to a file.
 	f, err := os.CreateTemp("", "*.txt")
@@ -75,44 +47,56 @@ func TestPostPut(t *testing.T) {
 	f2, _ := os.Open(f.Name())
 	defer f2.Close()
 
-	// POST the file.
-	req := httptest.NewRequest(http.MethodPost, testFileUrl, f2)
-	req.Header.Set("Content-Type", "Text/Plain")
-	postRecorder := httptest.NewRecorder()
+	t.Run("POST", func(t *testing.T) {
 
-	Handler(postRecorder, req)
+		// POST the file.
+		req := httptest.NewRequest(http.MethodPost, testFileUrl, f2)
+		req.Header.Set("Content-Type", testFileContentType)
+		postRecorder := httptest.NewRecorder()
 
-	// POST should return a string of JSON data with details about what was stored.
-	// To use this for testing, we need to extract the body and parse the JSON.
-	buf := new(bytes.Buffer)
-	buf.ReadFrom(postRecorder.Result().Body)
-	postRequestResultBody := buf.String()
-	i := &inode.Inode{}
-	if err = json.Unmarshal([]byte(postRequestResultBody), i); err != nil {
-		t.Fatal(err)
-	}
+		Handler(postRecorder, req)
 
-	assert.Equal(t, http.StatusCreated, postRecorder.Result().StatusCode)
-	assert.Equal(t, testFileFzxPath, i.FzxPath)
-	// TODO: Consider additional checks to validate POST response JSON.
+		// POST should return a string of JSON data with details about what was stored.
+		// To use this for testing, we need to extract the body and parse the JSON.
+		buf := new(bytes.Buffer)
+		buf.ReadFrom(postRecorder.Result().Body)
+		postRequestResultBody := buf.String()
+		i := &inode.Inode{}
+		if err = json.Unmarshal([]byte(postRequestResultBody), i); err != nil {
+			t.Fatal(err)
+		}
 
-	// Make a HEAD request and test the metadata.
-	req = httptest.NewRequest(http.MethodHead, testFileUrl, nil)
-	headRecorder := httptest.NewRecorder()
+		assert.Equal(t, http.StatusCreated, postRecorder.Result().StatusCode)
+		assert.Equal(t, testFileFzxPath, i.FzxPath)
+		// TODO: Consider additional checks to validate POST response JSON.
+	})
 
-	Handler(headRecorder, req)
+	t.Run("HEAD", func(t *testing.T) {
 
-	assert.Equal(t, http.StatusOK, headRecorder.Result().StatusCode)
-	assert.Equal(t, i.ContentType, headRecorder.Result().Header["Content-Type"][0])
-	// NOTE: Using Sprintf to convert between int and string seems dumb.
-	assert.Equal(t, fmt.Sprintf("%v", i.FileSize), headRecorder.Result().Header["Content-Length"][0])
+		// Make a HEAD request and test the metadata.
+		req := httptest.NewRequest(http.MethodHead, testFileUrl, nil)
+		headRecorder := httptest.NewRecorder()
 
-	// Make a GET request and test the contents.
-	req = httptest.NewRequest(http.MethodGet, testFileUrl, nil)
-	getRecorder := httptest.NewRecorder()
+		Handler(headRecorder, req)
 
-	Handler(getRecorder, req)
+		assert.Equal(t, http.StatusOK, headRecorder.Result().StatusCode)
+		assert.Equal(t, testFileContentType, headRecorder.Result().Header["Content-Type"][0])
+		// NOTE: Using Sprintf to convert between int and string seems dumb.
+		assert.Equal(t, fmt.Sprintf("%v", testFileLength), headRecorder.Result().Header["Content-Length"][0])
+	})
 
-	assert.Equal(t, http.StatusOK, getRecorder.Result().StatusCode)
-	assert.Equal(t, testFileContents, getRecorder.Body.String())
+	t.Run("GET", func(t *testing.T) {
+		// Make a GET request and test the contents.
+		req := httptest.NewRequest(http.MethodGet, testFileUrl, nil)
+		getRecorder := httptest.NewRecorder()
+
+		Handler(getRecorder, req)
+
+		assert.Equal(t, http.StatusOK, getRecorder.Result().StatusCode)
+		assert.Equal(t, testFileContents, getRecorder.Body.String())
+	})
+
+	// TODO: Test PUT.
+	// TODO: Test EXECUTE.
+	// TODO: Test DELETE.
 }
