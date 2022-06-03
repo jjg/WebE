@@ -421,4 +421,27 @@ So what's next?
 
 I could work on authorization, which is probably the biggest barrier to using this for anything outside of a debug environment.  Alternatively I could flesh-out the remaining methods.  Authorization probably makes the most sense to work on, but it's more boring, especially compared to playing with the `EXECUTE` method, hmm...
 
- 
+Spent some time cleaning things up in preparation for either of these things, and at this point I think the right thing to do is authorization.
+
+### Authorization Design
+
+I don't have any major changes planned for authorization from how things work in JSFS.  Let's review:
+
+* When an inode is created, an `access_key` is generated if one is not provided by the client
+* The `access_key` can be used to perform any method (GET, PUT, etc.)
+* The `access_key` can be used to generate any number of `access_token`s
+* `access_token`s can have an expiration date
+* `access_token`s can be revoked by changing the `access_key` for an object
+* `access_token`s are limited to the specific method they are generated for (if multiple methods are needed, generate multiple tokens)
+
+Right now I have a spot reserved to check the authorization just before we `switch` based on the request method.  So how best to implement this?
+
+I think the first step is to simply compare the supplied `access_key` to the inode's `access_key`; if these match then everything is authorized.
+
+> This reminds me, it seems like I came up with a way to avoid storing secrets like the `access_key` naked in inode files (important for federation).  Now would be a good time to remember that before I paint myself into a corner with the authorization design...
+
+Where should this live?  Should it be methods off the `inode` struct, or part of the `utils` module?
+
+Also we'll need to extract any `access_key` and `access_token` from the request which we're not doing yet either.
+
+A method(s) off the `inode` module kind of makes sense, something like `.getAuthorized(access string)`, `.putAuthorized(access string)`, etc.?
