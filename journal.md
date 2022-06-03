@@ -407,3 +407,18 @@ It's also at a point where I could install it using Gokrazy and have a somewhat 
 Got a chance to try running the latest build of [fzx](./fzx) on [gokrazy](https://gokrazy.org/) and after a bit of fiddling it works.  This is something of a milestone, having a read/write implementation running natively on nearly bare metal.
 
 Lots to do to make it practical but it's an exciting step (especially toward solar-powered nodes) and very invigorating!
+
+
+## 06032022
+
+Been a couple of months since I had a chance to work on this... where was I?
+
+Looks like I finished some major refactoring but maybe didn't make a journal entry for that?  Sure, there's commits from as recent as 04/13.
+
+Looking at the [README](./fzx/README.md) now I can see that I did at least update the status of the work there.
+
+So what's next?
+
+I could work on authorization, which is probably the biggest barrier to using this for anything outside of a debug environment.  Alternatively I could flesh-out the remaining methods.  Authorization probably makes the most sense to work on, but it's more boring, especially compared to playing with the `EXECUTE` method, hmm...
+
+ 

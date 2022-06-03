@@ -11,25 +11,9 @@ import (
 	"github.com/jjg/WebE/fzx/utils"
 )
 
+// TODO: Since writing is shared between POST and PUT, consider abstracting
+// the plubming here into a more generic function shared by the POST and PUT handlers.
 func Post(w http.ResponseWriter, req *http.Request, anInode *inode.Inode) {
-
-	// Check to see if inode was actually loaded.
-	// POST should not be allowed if an inode exists,
-	// so if we loaded an inode above, reject this request
-	// and maybe recommend PUT instead?
-	if anInode.Status != 404 {
-		w.Write([]byte("Can't POST over an existing file, try PUT instead."))
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		return
-	}
-
-	// TODO: Check authorization.
-
-	// Set inode metadata
-	v, ok := req.Header["Content-Type"]
-	if ok {
-		anInode.ContentType = v[0]
-	}
 
 	// Write blocks.
 	log.Print("Begin processing uploaded data.")

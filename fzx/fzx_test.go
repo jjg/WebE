@@ -71,6 +71,19 @@ func TestHttpMethods(t *testing.T) {
 		// TODO: Consider additional checks to validate POST response JSON.
 	})
 
+	t.Run("rePOST", func(t *testing.T) {
+
+		// POST the same file to the same location.
+		req := httptest.NewRequest(http.MethodPost, testFileUrl, f2)
+		req.Header.Set("Content-Type", testFileContentType)
+		rePostRecorder := httptest.NewRecorder()
+
+		Handler(rePostRecorder, req)
+
+		// This second POST should return StatusMethodNotAllowed.
+		assert.Equal(t, http.StatusMethodNotAllowed, rePostRecorder.Result().StatusCode)
+	})
+
 	t.Run("HEAD", func(t *testing.T) {
 
 		// Make a HEAD request and test the metadata.

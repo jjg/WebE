@@ -27,9 +27,6 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 	var err error
 	var fzxPath string
 
-	// DEBUG
-	log.Print(req)
-
 	// Translate DNS name to fzx namespace.
 	if fzxPath, err = utils.FzxPathFromRequest(req); err != nil {
 		log.Printf("Error extracting fzx path from request: %v", err)
@@ -47,17 +44,22 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 		log.Printf("Error loading inode for %v, %v", fzxPath, err)
 		anInode.BlockSize = *blockSize
 		anInode.StorageLocation = storageLocation
+
+		// Set additional inode metadata based on request.
+		v, ok := req.Header["Content-Type"]
+		if ok {
+			anInode.ContentType = v[0]
+		}
 	} else {
 		log.Printf("Loaded inode for %v", fzxPath)
 
-		// Set headers using inode data.
+		// Set response headers using inode data.
 		w.Header().Add("Content-Type", anInode.ContentType)
 		w.Header().Add("Content-Length", fmt.Sprintf("%v", anInode.FileSize))
 		w.Header().Add("FzxPath", anInode.FzxPath)
 	}
 
-	// DEBUG
-	log.Print(anInode)
+	// TODO: Process request authorization.
 
 	switch req.Method {
 	case "HEAD":
@@ -71,7 +73,13 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 		methods.Get(w, req, anInode)
 	case "POST":
 		log.Print("Got POST")
-		methods.Post(w, req, anInode)
+		// POST should not be allowed if an inode already exists.
+		if anInode.Status != http.StatusNotFound {
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			w.Write([]byte("Can't POST over an existing file, try PUT instead."))
+		} else {
+			methods.Post(w, req, anInode)
+		}
 	case "PUT":
 		log.Print("Got PUT")
 		methods.Put(w, req, anInode)
@@ -97,6 +105,5 @@ func main() {
 	http.HandleFunc("/", Handler)
 
 	// Listen for incoming HTTP requests.
-	// NOTE: This blocks anything below it from running.
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", *listenPort), nil))
 }

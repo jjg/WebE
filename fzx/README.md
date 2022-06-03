@@ -48,5 +48,6 @@ The API is based off [jsfs](https://github.com/jjg/jsfs#api).  It is nowhere nea
 * Implement federation
 * Refactor for performance
 * Bugs
+  + Weird stuff happens if you upload a directory
   + ~~`HEAD` doesn't close the connection when returning 404 for some reason?~~
   + ~~Fix broken tests~~
