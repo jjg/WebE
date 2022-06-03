@@ -61,19 +61,27 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 
 	// TODO: Process request authorization.
 
+	// TODO: I don't love how the response is sometimes updated in the handler
+	// and sometimes updated here.  Consider other approaches that keep the HTTP
+	// stuff limited to this layer.
 	switch req.Method {
 	case "HEAD":
 		log.Print("Got HEAD")
-		methods.Head(w, req, anInode)
+		if anInode.Status != http.StatusNotFound {
+			methods.Head(w, req, anInode)
+		}
 	case "OPTIONS":
 		log.Print("Got OPTIONS")
+		// TODO: Does OPTIONS care if we have an inode or not?
 		methods.Options(w, req, anInode)
 	case "GET":
 		log.Print("Got GET")
-		methods.Get(w, req, anInode)
+		if anInode.Status != http.StatusNotFound {
+			methods.Get(w, req, anInode)
+		}
 	case "POST":
 		log.Print("Got POST")
-		// POST should not be allowed if an inode already exists.
+		// POST is not be allowed if an inode already exists!
 		if anInode.Status != http.StatusNotFound {
 			w.WriteHeader(http.StatusMethodNotAllowed)
 			w.Write([]byte("Can't POST over an existing file, try PUT instead."))
@@ -82,13 +90,22 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 		}
 	case "PUT":
 		log.Print("Got PUT")
-		methods.Put(w, req, anInode)
+		if anInode.Status == http.StatusNotFound {
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			w.Write([]byte("Can't PUT unless file exists, try POST instead."))
+		} else {
+			methods.Put(w, req, anInode)
+		}
 	case "DELETE":
 		log.Print("Got DELETE")
-		methods.Delete(w, req, anInode)
+		if anInode.Status != http.StatusNotFound {
+			methods.Delete(w, req, anInode)
+		}
 	case "EXECUTE":
 		log.Print("Got EXECUTE")
-		methods.Execute(w, req, anInode)
+		if anInode.Status != http.StatusNotFound {
+			methods.Execute(w, req, anInode)
+		}
 	default:
 		log.Printf("I don't know what to do with method %v", req.Method)
 		w.WriteHeader(http.StatusNotImplemented)

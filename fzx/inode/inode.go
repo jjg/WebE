@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"net/http"
 	"time"
 
 	"github.com/jjg/WebE/fzx/utils"
@@ -58,7 +59,7 @@ func (i *Inode) Load(storageLocation *string, fzxPath string) error {
 	inodeFilename := fmt.Sprintf("%v/%v.json", *i.StorageLocation, i.Fingerprint)
 	if inodeJson, err = ioutil.ReadFile(inodeFilename); err != nil {
 		// TODO: Inspect err to set Status more accurately.
-		i.Status = 404
+		i.Status = http.StatusNotFound
 		return err
 	}
 
@@ -66,7 +67,7 @@ func (i *Inode) Load(storageLocation *string, fzxPath string) error {
 		return err
 	}
 
-	i.Status = 200
+	i.Status = http.StatusOK
 
 	return err
 }

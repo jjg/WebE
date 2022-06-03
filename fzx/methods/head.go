@@ -6,19 +6,8 @@ import (
 	"github.com/jjg/WebE/fzx/inode"
 )
 
+// TODO: Consider eliminating this module as it does very little right now.
 func Head(w http.ResponseWriter, req *http.Request, anInode *inode.Inode) {
-
-	// Check to see if inode was actually loaded.
-	if anInode.Status == 404 {
-		w.WriteHeader(http.StatusNotFound)
-
-		// NOTE: I don't know why this is needed, but if we don't
-		// write something, the connection hangs open.
-		w.Write([]byte("Not found"))
-		return
-	}
-
-	// TODO: Check authorization.
 
 	// Return result.
 	w.WriteHeader(http.StatusOK)

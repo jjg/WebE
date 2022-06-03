@@ -66,21 +66,20 @@ func Post(w http.ResponseWriter, req *http.Request, anInode *inode.Inode) {
 	// Update inode metadata
 	anInode.FileSize = totalBlockBytesWritten
 
-	// DEBUG
-	log.Print(anInode)
-
 	// Write the inode.
 	if err := anInode.Save(); err != nil {
 		log.Print(err)
 	}
 
-	// Return result.
+	// Finalize the result.
 	if s, err := anInode.JsonString(); err != nil {
 		log.Print(err)
-		w.WriteHeader(http.StatusInternalServerError)
+		anInode.Status = http.StatusInternalServerError
+		w.WriteHeader(anInode.Status)
 		io.WriteString(w, fmt.Sprintf("Error parsing inode: %v", err))
 	} else {
-		w.WriteHeader(http.StatusCreated)
+		anInode.Status = http.StatusCreated
+		w.WriteHeader(anInode.Status)
 		io.WriteString(w, s)
 	}
 }

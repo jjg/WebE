@@ -10,14 +10,6 @@ import (
 
 func Get(w http.ResponseWriter, req *http.Request, anInode *inode.Inode) {
 
-	// Check to see if inode was actually loaded.
-	if anInode.Status == 404 {
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
-
-	// TODO: Check authorization.
-
 	// Return blocks.
 	for _, blockName := range anInode.Blocks {
 		var err error
