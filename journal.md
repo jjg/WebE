@@ -445,3 +445,9 @@ Where should this live?  Should it be methods off the `inode` struct, or part of
 Also we'll need to extract any `access_key` and `access_token` from the request which we're not doing yet either.
 
 A method(s) off the `inode` module kind of makes sense, something like `.getAuthorized(access string)`, `.putAuthorized(access string)`, etc.?
+
+## 01122023
+
+Just peeking-in to create an ARM build to continue experimenting.  Turns out to be really easy:
+
+`env GOARCH=arm54 go build -o fzx_arm64`
