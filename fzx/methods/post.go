@@ -15,6 +15,10 @@ import (
 // the plubming here into a more generic function shared by the POST and PUT handlers.
 func Post(w http.ResponseWriter, req *http.Request, anInode *inode.Inode) {
 
+	// TODO: Purging the blocks array here is kind of sloppy,
+	// find a better way.
+	anInode.Blocks = nil
+
 	// Write blocks.
 	log.Print("Begin processing uploaded data.")
 	blockData := make([]byte, anInode.BlockSize)

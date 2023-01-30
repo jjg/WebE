@@ -94,7 +94,10 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 			w.WriteHeader(http.StatusMethodNotAllowed)
 			w.Write([]byte("Can't PUT unless file exists, try POST instead."))
 		} else {
-			methods.Put(w, req, anInode)
+			// TODO: Abstract storage into something shared by both
+			// POST and PUT; for now, just use the POST function for both.
+			methods.Post(w, req, anInode)
+			//methods.Put(w, req, anInode)
 		}
 	case "DELETE":
 		log.Print("Got DELETE")
